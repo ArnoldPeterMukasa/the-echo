@@ -2,33 +2,54 @@ import Link from "next/link";
 
 export default function Header() {
   return (
-    <header className="border-b">
-      <div className="max-w-6xl mx-auto px-6 py-4 flex justify-between items-center">
+    <header className="sticky top-0 bg-white border-b z-50">
+      <div className="max-w-6xl mx-auto px-6 h-16 flex items-center justify-between">
 
         {/* Logo */}
-        <Link href="/" className="text-2xl font-bold">
-          The Echo
+        <Link href="/">
+          <div>
+            <h1 className="text-2xl font-bold">
+              The Echo
+            </h1>
+
+            <p className="text-xs text-gray-500">
+              Echoing Reality of Thousands...
+            </p>
+          </div>
         </Link>
 
-        {/* Nav */}
-        <nav className="flex gap-6 text-sm text-gray-700">
-          <Link href="/" className="hover:text-black">
+        {/* Navigation */}
+        <nav className="flex gap-8 text-sm font-medium">
+
+          <Link
+            href="/"
+            className="hover:text-gray-500 transition"
+          >
             Home
           </Link>
 
-          <Link href="/articles" className="hover:text-black">
+          <Link
+            href="/articles"
+            className="hover:text-gray-500 transition"
+          >
             Articles
           </Link>
 
-          <Link href="/about" className="hover:text-black">
+          <Link
+            href="/about"
+            className="hover:text-gray-500 transition"
+          >
             About
           </Link>
 
-          <Link href="/contact" className="hover:text-black">
+          <Link
+            href="/contact"
+            className="hover:text-gray-500 transition"
+          >
             Contact
           </Link>
-        </nav>
 
+        </nav>
       </div>
     </header>
   );
