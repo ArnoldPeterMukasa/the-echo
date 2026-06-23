@@ -9,6 +9,9 @@ export const articles: Article[] = [
         author: "admin",
         category: "Announcement",
         createdAt: "22-06-2026",
+        featured:true,
+        trending:true,
+        coverImage:"/images/hero.jpg"
     },
     {
     id: "2",
@@ -19,5 +22,6 @@ export const articles: Article[] = [
     author: "Editorial Team",
     category: "Campus Life",
     createdAt: "22-06-2026",
+    trending: true
   },
 ];
