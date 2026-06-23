@@ -8,4 +8,7 @@ export type Article={
     author: string;
     category: string;
     createdAt: string;
+    featured?: boolean;
+    trending?: boolean;
+    coverImage?: string;
 };
