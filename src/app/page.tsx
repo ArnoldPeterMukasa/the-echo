@@ -1,5 +1,9 @@
-import Link from "next/link";
 import { articles } from "@/src/data/articles";
+import FeaturedSection from "@/src/components/Home/FeaturedSection";
+import LatestSection from "@/src/components/Home/LatestSection";
+import TrendingSection from "@/src/components/Home/TrendingSection";
+import CategorySection from  "@/src/components/Home/CategorySection";
+import NewsletterSEction from "@/src/components/Home/NewsletterSection";
 
 export default function Home() {
   const featured = articles[0];
@@ -8,55 +12,15 @@ export default function Home() {
   return (
     <main className="max-w-6xl mx-auto px-6 py-10">
 
-      {/* FEATURED */}
-      <section className="mb-12">
-        <p className="text-sm text-gray-500 uppercase">
-          Featured Story
-        </p>
+      <FeaturedSection featured={featured} />
 
-        <Link href={`/articles/${featured.slug}`}>
-          <h1 className="text-5xl font-bold mt-2 hover:underline">
-            {featured.title}
-          </h1>
-        </Link>
+      <TrendingSection />
 
-        <p className="text-gray-600 mt-4 text-lg max-w-2xl">
-          {featured.excerpt}
-        </p>
+      <LatestSection articles={rest} />
 
-        <p className="text-sm text-gray-400 mt-2">
-          By {featured.author} • {featured.createdAt}
-        </p>
-      </section>
+      <CategorySection/>
 
-      {/* GRID */}
-      <section>
-        <h2 className="text-2xl font-semibold mb-6">
-          Latest Articles
-        </h2>
-
-        <div className="grid md:grid-cols-2 gap-6">
-          {rest.map((article) => (
-            <Link
-              key={article.id}
-              href={`/articles/${article.slug}`}
-              className="border rounded-lg p-5 hover:shadow-md transition"
-            >
-              <h3 className="text-xl font-bold">
-                {article.title}
-              </h3>
-
-              <p className="text-gray-600 mt-2">
-                {article.excerpt}
-              </p>
-
-              <p className="text-xs text-gray-400 mt-3">
-                {article.category}
-              </p>
-            </Link>
-          ))}
-        </div>
-      </section>
+      <NewsletterSEction/>
 
     </main>
   );
