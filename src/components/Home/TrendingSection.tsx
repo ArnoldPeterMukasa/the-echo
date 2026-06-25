@@ -1,10 +1,10 @@
 import Link from "next/link";
 import Image from "next/image";
-import { articles } from "@/src/data/articles";
+import { getArticles } from "@/src/lib/getArticles";
 
 export default function TrendingSection() {
-  const trending = articles.filter(
-    (article) => article.trending
+  const trending = getArticles().filter(
+    (a) => a.trending && a.status === "published"
   );
 
   if (trending.length === 0) {
