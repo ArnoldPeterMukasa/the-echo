@@ -1,4 +1,5 @@
 import Link from "next/link";
+import Image from "next/image";
 
 type Props = {
   featured: any;
@@ -6,24 +7,45 @@ type Props = {
 
 export default function FeaturedSection({ featured }: Props) {
   return (
-    <section className="mb-12">
-      <p className="text-sm text-gray-500 uppercase">
-        Featured Story
-      </p>
+    <section className="mb-16">
+      <div className="grid md:grid-cols-2 gap-10 items-center">
 
-      <Link href={`/articles/${featured.slug}`}>
-        <h1 className="text-5xl font-bold mt-2 hover:underline">
-          {featured.title}
-        </h1>
-      </Link>
+        {/* Image */}
+        <div>
+          <Image
+            src={featured.coverImage}
+            alt={featured.title}
+            width={1200}
+            height={800}
+            priority
+            className="rounded-xl w-full h-[400px] object-cover"
+          />
+        </div>
 
-      <p className="text-gray-600 mt-4 text-lg max-w-2xl">
-        {featured.excerpt}
-      </p>
+        {/* Content */}
+        <div>
 
-      <p className="text-sm text-gray-400 mt-2">
-        By {featured.author} • {featured.createdAt}
-      </p>
+          <p className="text-sm uppercase text-gray-500 mb-3">
+            Featured Story
+          </p>
+
+          <Link href={`/articles/${featured.slug}`}>
+            <h1 className="text-5xl font-bold leading-tight hover:underline">
+              {featured.title}
+            </h1>
+          </Link>
+
+          <p className="text-gray-600 text-lg mt-6">
+            {featured.excerpt}
+          </p>
+
+          <div className="mt-6 text-sm text-gray-400">
+            By {featured.author} • {featured.createdAt}
+          </div>
+
+        </div>
+
+      </div>
     </section>
   );
 }
