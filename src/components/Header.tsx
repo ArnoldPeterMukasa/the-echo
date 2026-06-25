@@ -29,6 +29,11 @@ export default function Header() {
           </Link>
 
           <Link
+          href="/dashboard" className="hover:text-gray-500 transition">
+            Dashboard
+          </Link>
+
+          <Link
             href="/articles"
             className="hover:text-gray-500 transition"
           >
