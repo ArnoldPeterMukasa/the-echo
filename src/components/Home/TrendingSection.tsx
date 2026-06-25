@@ -1,36 +1,41 @@
+"use client";
+
 import Link from "next/link";
 import Image from "next/image";
-import { getArticles } from "@/src/lib/getArticles";
+import { useArticleStore } from "@/src/store/articleStore";
 
 export default function TrendingSection() {
-  const trending = getArticles().filter(
-    (a) => a.trending && a.status === "published"
-  );
+  const { getTrending } = useArticleStore();
 
-  if (trending.length === 0) {
-    return null;
-  }
+  const trending = getTrending();
+
+  if (!trending.length) return null;
 
   return (
     <section className="mb-16">
+
       <h2 className="text-3xl font-bold mb-8">
         Trending Stories
       </h2>
 
       <div className="grid md:grid-cols-3 gap-6">
+
         {trending.map((article) => (
           <Link
             key={article.id}
             href={`/articles/${article.slug}`}
             className="border rounded-xl overflow-hidden hover:shadow-lg transition"
           >
-            <Image
-              src={article.coverImage}
-              alt={article.title}
-              width={600}
-              height={400}
-              className="w-full h-48 object-cover"
-            />
+
+            {article.coverImage && (
+              <Image
+                src={article.coverImage}
+                alt={article.title}
+                width={600}
+                height={400}
+                className="w-full h-48 object-cover"
+              />
+            )}
 
             <div className="p-5">
 
@@ -47,9 +52,12 @@ export default function TrendingSection() {
               </p>
 
             </div>
+
           </Link>
         ))}
+
       </div>
+
     </section>
   );
 }

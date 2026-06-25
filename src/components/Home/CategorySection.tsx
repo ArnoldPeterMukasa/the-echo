@@ -1,52 +1,30 @@
-import Link from "next/link";
+"use client";
 
-const categories = [
-  {
-    name: "Campus Life",
-    description: "Student experiences, events and memories.",
-  },
-  {
-    name: "Technology",
-    description: "Software, AI, innovation and development.",
-  },
-  {
-    name: "Academics",
-    description: "Learning, coursework and research.",
-  },
-  {
-    name: "Sports",
-    description: "Competitions, teams and achievements.",
-  },
-  {
-    name: "Projects",
-    description: "Student projects and showcases.",
-  },
-];
+import { useArticleStore } from "@/src/store/articleStore";
 
 export default function CategorySection() {
+  const { articles } = useArticleStore();
+
+  const categories = Array.from(
+    new Set(articles.map((a) => a.category))
+  );
+
   return (
     <section className="mb-16">
 
-      <h2 className="text-3xl font-bold mb-8">
-        Explore Categories
+      <h2 className="text-2xl font-semibold mb-6">
+        Browse by Category
       </h2>
 
-      <div className="grid md:grid-cols-2 lg:grid-cols-5 gap-5">
+      <div className="flex flex-wrap gap-3">
 
-        {categories.map((category) => (
-          <Link
-            key={category.name}
-            href="/articles"
-            className="border rounded-xl p-6 hover:shadow-lg transition"
+        {categories.map((cat) => (
+          <span
+            key={cat}
+            className="px-4 py-2 border rounded-full text-sm"
           >
-            <h3 className="font-bold text-lg mb-3">
-              {category.name}
-            </h3>
-
-            <p className="text-sm text-gray-600">
-              {category.description}
-            </p>
-          </Link>
+            {cat}
+          </span>
         ))}
 
       </div>

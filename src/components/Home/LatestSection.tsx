@@ -1,60 +1,50 @@
+"use client";
+
 import Link from "next/link";
-import Image from "next/image";
 
 type Props = {
   articles: any[];
 };
 
 export default function LatestSection({ articles }: Props) {
+  if (!articles || articles.length === 0) return null;
+
   return (
     <section className="mb-16">
 
-      <div className="flex items-center justify-between mb-8">
-        <h2 className="text-3xl font-bold">
-          Latest Articles
-        </h2>
-      </div>
+      <h2 className="text-2xl font-semibold mb-6">
+        Latest Articles
+      </h2>
 
-      <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
+      <div className="grid md:grid-cols-2 gap-6">
+
         {articles.map((article) => (
           <Link
             key={article.id}
             href={`/articles/${article.slug}`}
-            className="group border rounded-xl overflow-hidden hover:shadow-lg transition"
+            className="border rounded-lg p-5 hover:shadow-md transition"
           >
-            {/* Image */}
-            <Image
-              src={article.coverImage}
-              alt={article.title}
-              width={600}
-              height={400}
-              className="w-full h-56 object-cover group-hover:scale-105 transition duration-300"
-            />
 
-            {/* Content */}
-            <div className="p-5">
+            <p className="text-xs text-gray-500 uppercase mb-2">
+              {article.category}
+            </p>
 
-              <p className="text-xs uppercase text-gray-500 mb-2">
-                {article.category}
-              </p>
+            <h3 className="text-xl font-bold">
+              {article.title}
+            </h3>
 
-              <h3 className="text-xl font-bold mb-3 group-hover:underline">
-                {article.title}
-              </h3>
+            <p className="text-gray-600 mt-2">
+              {article.excerpt}
+            </p>
 
-              <p className="text-gray-600 text-sm mb-4">
-                {article.excerpt}
-              </p>
+            <p className="text-xs text-gray-400 mt-3">
+              {article.author} • {article.createdAt}
+            </p>
 
-              <div className="text-xs text-gray-400">
-                By {article.author} • {article.createdAt}
-              </div>
-
-            </div>
           </Link>
         ))}
-      </div>
 
+      </div>
     </section>
   );
 }
