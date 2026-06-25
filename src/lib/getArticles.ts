@@ -9,14 +9,5 @@ export function getArticles() {
     localStorage.getItem("articles") || "[]"
   );
 
-  const merged = [...local, ...staticArticles];
-
-  // remove duplicates by id
-  const uniqueMap = new Map();
-
-  merged.forEach((article) => {
-    uniqueMap.set(article.id, article);
-  });
-
-  return Array.from(uniqueMap.values());
+  return [...staticArticles, ...local];
 }
