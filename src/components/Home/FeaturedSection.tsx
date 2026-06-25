@@ -15,8 +15,7 @@ export default function FeaturedSection({ featured }: Props) {
           <Image
             src={featured.coverImage}
             alt={featured.title}
-            width={1200}
-            height={800}
+            fill
             priority
             className="rounded-xl w-full h-[400px] object-cover"
           />
