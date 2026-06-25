@@ -1,23 +1,41 @@
-import Link from "next/link";
-import { getArticles } from "@/src/lib/getArticles";
+"use client";
 
-const updateLocalArticles = (updated: any[]) => {
-  localStorage.setItem("articles", JSON.stringify(updated));
-};
+import { useEffect } from "react";
+import Link from "next/link";
+import { useArticleStore } from "@/src/store/articleStore";
 
 export default function DashboardPage() {
-  const articles = getArticles();
+  const {
+    articles,
+    hydrate,
+    updateArticle,
+    deleteArticle,
+  } = useArticleStore();
 
-  const drafts = articles.filter((a) => a.status === "draft");
-  const pending = articles.filter((a) => a.status === "pending");
-  const published = articles.filter((a) => a.status === "published");
+  useEffect(() => {
+    hydrate();
+  }, [hydrate]);
+
+  const drafts = articles.filter(
+    (a) => a.status === "draft"
+  );
+
+  const pending = articles.filter(
+    (a) => a.status === "pending"
+  );
+
+  const published = articles.filter(
+    (a) => a.status === "published"
+  );
 
   return (
     <main className="max-w-6xl mx-auto px-6 py-12">
 
       {/* HEADER */}
       <div className="flex items-center justify-between mb-10">
-        <h1 className="text-4xl font-bold">Writer Dashboard</h1>
+        <h1 className="text-4xl font-bold">
+          Writer Dashboard
+        </h1>
 
         <Link
           href="/dashboard/new"
@@ -31,18 +49,30 @@ export default function DashboardPage() {
       <div className="grid md:grid-cols-3 gap-6 mb-12">
 
         <div className="border rounded-xl p-6">
-          <h2 className="text-sm text-gray-500">Drafts</h2>
-          <p className="text-3xl font-bold">{drafts.length}</p>
+          <h2 className="text-sm text-gray-500">
+            Drafts
+          </h2>
+          <p className="text-3xl font-bold">
+            {drafts.length}
+          </p>
         </div>
 
         <div className="border rounded-xl p-6">
-          <h2 className="text-sm text-gray-500">Pending Review</h2>
-          <p className="text-3xl font-bold">{pending.length}</p>
+          <h2 className="text-sm text-gray-500">
+            Pending Review
+          </h2>
+          <p className="text-3xl font-bold">
+            {pending.length}
+          </p>
         </div>
 
         <div className="border rounded-xl p-6">
-          <h2 className="text-sm text-gray-500">Published</h2>
-          <p className="text-3xl font-bold">{published.length}</p>
+          <h2 className="text-sm text-gray-500">
+            Published
+          </h2>
+          <p className="text-3xl font-bold">
+            {published.length}
+          </p>
         </div>
 
       </div>
@@ -57,7 +87,7 @@ export default function DashboardPage() {
           {published.map((article) => (
             <div
               key={article.id}
-              className="border rounded-lg p-5 hover:shadow-md transition"
+              className="border rounded-lg p-5"
             >
               <Link href={`/articles/${article.slug}`}>
                 <h3 className="font-bold text-lg">
@@ -76,28 +106,20 @@ export default function DashboardPage() {
               <div className="flex gap-3 mt-4">
 
                 <button
-                  onClick={() => {
-                    const updated = articles.map((a) =>
-                      a.id === article.id
-                        ? { ...a, status: "pending" }
-                        : a
-                    );
-                    updateLocalArticles(updated);
-                    window.location.reload();
-                  }}
+                  onClick={() =>
+                    updateArticle(article.id, {
+                      status: "pending",
+                    })
+                  }
                   className="px-3 py-1 text-sm border rounded"
                 >
                   Move to Pending
                 </button>
 
                 <button
-                  onClick={() => {
-                    const updated = articles.filter(
-                      (a) => a.id !== article.id
-                    );
-                    updateLocalArticles(updated);
-                    window.location.reload();
-                  }}
+                  onClick={() =>
+                    deleteArticle(article.id)
+                  }
                   className="px-3 py-1 text-sm border rounded text-red-500"
                 >
                   Delete
@@ -132,30 +154,22 @@ export default function DashboardPage() {
               <div className="flex gap-3 mt-4">
 
                 <button
-                  onClick={() => {
-                    const updated = articles.map((a) =>
-                      a.id === article.id
-                        ? { ...a, status: "published" }
-                        : a
-                    );
-                    updateLocalArticles(updated);
-                    window.location.reload();
-                  }}
+                  onClick={() =>
+                    updateArticle(article.id, {
+                      status: "published",
+                    })
+                  }
                   className="px-3 py-1 text-sm bg-black text-white rounded"
                 >
                   Approve
                 </button>
 
                 <button
-                  onClick={() => {
-                    const updated = articles.map((a) =>
-                      a.id === article.id
-                        ? { ...a, status: "draft" }
-                        : a
-                    );
-                    updateLocalArticles(updated);
-                    window.location.reload();
-                  }}
+                  onClick={() =>
+                    updateArticle(article.id, {
+                      status: "draft",
+                    })
+                  }
                   className="px-3 py-1 text-sm border rounded"
                 >
                   Send Back to Draft

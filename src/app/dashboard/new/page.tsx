@@ -2,9 +2,12 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import { useArticleStore } from "@/src/store/articleStore";
+import ArticlePreview from "@/src/components/dashboard/ArticlePreview";
 
 export default function NewArticlePage() {
   const router = useRouter();
+  const { addArticle } = useArticleStore();
 
   const [title, setTitle] = useState("");
   const [excerpt, setExcerpt] = useState("");
@@ -14,24 +17,27 @@ export default function NewArticlePage() {
   const [coverImage, setCoverImage] = useState("");
 
   const handleSubmit = (status: "draft" | "pending") => {
+    if (!title.trim()) return; // 🔥 FIX 1: prevent empty articles
+
     const newArticle = {
-      id: Date.now().toString(),
+      id: crypto.randomUUID(), // 🔥 FIX 2: better unique ID
       title,
       excerpt,
       content,
       category,
       author,
       coverImage,
-      slug: title.toLowerCase().replace(/\s+/g, "-"),
+      slug: title
+        .toLowerCase()
+        .trim()
+        .replace(/\s+/g, "-")
+        .replace(/[^\w-]/g, ""), // 🔥 FIX 3: safer slug
       createdAt: new Date().toISOString().split("T")[0],
       status,
+      trending: false, // 🔥 important for later sections
     };
 
-    const existing = JSON.parse(localStorage.getItem("articles") || "[]");
-    localStorage.setItem(
-      "articles",
-      JSON.stringify([newArticle, ...existing])
-    );
+    addArticle(newArticle);
 
     router.push("/dashboard");
   };
@@ -106,6 +112,15 @@ export default function NewArticlePage() {
         </div>
 
       </div>
+
+      <ArticlePreview
+        title={title}
+        excerpt={excerpt}
+        content={content}
+        author={author}
+        category={category}
+        coverImage={coverImage}
+      />
 
     </main>
   );
