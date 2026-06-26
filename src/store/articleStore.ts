@@ -6,6 +6,9 @@ type Store = {
   articles: Article[];
   hydrated: boolean;
 
+  searchQuery: string;
+  setSearchQuery: (q: string) => void;
+
   load: () => void;
   hydrate: () => void;
 
@@ -18,11 +21,14 @@ type Store = {
   getPending: () => Article[];
   getTrending: () => Article[];
   getFeatured: () => Article | undefined;
+
+  getFiltered: () => Article[];
 };
 
 export const useArticleStore = create<Store>((set, get) => ({
   articles: [],
   hydrated: false,
+  searchQuery: "",
 
   load: () => {
     const local = JSON.parse(localStorage.getItem("articles") || "[]");
@@ -32,6 +38,10 @@ export const useArticleStore = create<Store>((set, get) => ({
   hydrate: () => {
     const local = JSON.parse(localStorage.getItem("articles") || "[]");
     set({ articles: local, hydrated: true });
+  },
+
+  setSearchQuery: (q) => {
+    set({ searchQuery: q });
   },
 
   addArticle: (article) => {
@@ -55,45 +65,52 @@ export const useArticleStore = create<Store>((set, get) => ({
     set({ articles: updated });
   },
 
-  getPublished: () => {
-    return get().articles.filter((a) => a.status === "published");
-  },
+  getPublished: () =>
+    get().articles.filter((a) => a.status === "published"),
 
-  getDrafts: () => {
-    return get().articles.filter((a) => a.status === "draft");
-  },
+  getDrafts: () =>
+    get().articles.filter((a) => a.status === "draft"),
 
-  getPending: () => {
-    return get().articles.filter((a) => a.status === "pending");
-  },
+  getPending: () =>
+    get().articles.filter((a) => a.status === "pending"),
 
-  getTrending: () => {
-    return get()
-      .articles
-      .filter((a) => a.status === "published")
-      .sort((a, b) => {
-        const score = (x: any) =>
-          (x.trending ? 3 : 0) +
-          new Date(x.createdAt).getTime();
+  getTrending: () =>
+    get().articles.filter(
+      (a) => a.status === "published" && a.trending
+    ),
 
-        return score(b) - score(a);
-      });
-  },
-
+  // ⭐ SINGLE CLEAN FEATURED ALGORITHM
   getFeatured: () => {
     const published = get().articles.filter(
       (a) => a.status === "published"
     );
 
-    const sorted = [...published].sort((a, b) => {
-      const score = (x: any) =>
-        (x.trending ? 3 : 0) +
-        (x.featured ? 5 : 0) +
-        new Date(x.createdAt).getTime();
+    if (published.length === 0) return undefined;
 
-      return score(b) - score(a);
+    const scored = published.map((a) => ({
+      ...a,
+      score:
+        (a.trending ? 3 : 0) +
+        (a.featured ? 5 : 0) +
+        new Date(a.createdAt).getTime() / 1000000,
+    }));
+
+    return scored.sort((a, b) => b.score - a.score)[0];
+  },
+
+  // 🔍 SEARCH (GLOBAL)
+  getFiltered: () => {
+    const q = get().searchQuery.toLowerCase().trim();
+
+    if (!q) return get().articles;
+
+    return get().articles.filter((a) => {
+      return (
+        a.title?.toLowerCase().includes(q) ||
+        a.excerpt?.toLowerCase().includes(q) ||
+        a.category?.toLowerCase().includes(q) ||
+        a.author?.toLowerCase().includes(q)
+      );
     });
-
-    return sorted[0];
   },
 }));
