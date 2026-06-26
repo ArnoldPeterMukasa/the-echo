@@ -16,17 +16,9 @@ export default function DashboardPage() {
     hydrate();
   }, [hydrate]);
 
-  const drafts = articles.filter(
-    (a) => a.status === "draft"
-  );
-
-  const pending = articles.filter(
-    (a) => a.status === "pending"
-  );
-
-  const published = articles.filter(
-    (a) => a.status === "published"
-  );
+  const drafts = articles.filter((a) => a.status === "draft");
+  const pending = articles.filter((a) => a.status === "pending");
+  const published = articles.filter((a) => a.status === "published");
 
   return (
     <main className="max-w-6xl mx-auto px-6 py-12">
@@ -49,30 +41,18 @@ export default function DashboardPage() {
       <div className="grid md:grid-cols-3 gap-6 mb-12">
 
         <div className="border rounded-xl p-6">
-          <h2 className="text-sm text-gray-500">
-            Drafts
-          </h2>
-          <p className="text-3xl font-bold">
-            {drafts.length}
-          </p>
+          <h2 className="text-sm text-gray-500">Drafts</h2>
+          <p className="text-3xl font-bold">{drafts.length}</p>
         </div>
 
         <div className="border rounded-xl p-6">
-          <h2 className="text-sm text-gray-500">
-            Pending Review
-          </h2>
-          <p className="text-3xl font-bold">
-            {pending.length}
-          </p>
+          <h2 className="text-sm text-gray-500">Pending Review</h2>
+          <p className="text-3xl font-bold">{pending.length}</p>
         </div>
 
         <div className="border rounded-xl p-6">
-          <h2 className="text-sm text-gray-500">
-            Published
-          </h2>
-          <p className="text-3xl font-bold">
-            {published.length}
-          </p>
+          <h2 className="text-sm text-gray-500">Published</h2>
+          <p className="text-3xl font-bold">{published.length}</p>
         </div>
 
       </div>
@@ -103,7 +83,16 @@ export default function DashboardPage() {
                 </p>
               </Link>
 
+              {/* ACTIONS */}
               <div className="flex gap-3 mt-4">
+
+                {/* EDIT BUTTON (ADDED) */}
+                <Link
+                  href={`/dashboard/edit/${article.id}`}
+                  className="px-3 py-1 text-sm border rounded"
+                >
+                  Edit
+                </Link>
 
                 <button
                   onClick={() =>
@@ -117,9 +106,7 @@ export default function DashboardPage() {
                 </button>
 
                 <button
-                  onClick={() =>
-                    deleteArticle(article.id)
-                  }
+                  onClick={() => deleteArticle(article.id)}
                   className="px-3 py-1 text-sm border rounded text-red-500"
                 >
                   Delete
