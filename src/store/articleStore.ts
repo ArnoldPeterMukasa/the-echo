@@ -17,42 +17,33 @@ type Store = {
   getDrafts: () => Article[];
   getPending: () => Article[];
   getTrending: () => Article[];
+  getFeatured: () => Article;
 };
 
 export const useArticleStore = create<Store>((set, get) => ({
   articles: [],
   hydrated: false,
 
-  // 🔄 Load from localStorage (basic)
+  // load from localStorage
   load: () => {
-    const local = JSON.parse(
-      localStorage.getItem("articles") || "[]"
-    );
-
+    const local = JSON.parse(localStorage.getItem("articles") || "[]");
     set({ articles: local });
   },
 
-  // 🔄 Hydrate store (recommended)
+  // hydrate (recommended)
   hydrate: () => {
-    const local = JSON.parse(
-      localStorage.getItem("articles") || "[]"
-    );
-
-    set({
-      articles: local,
-      hydrated: true,
-    });
+    const local = JSON.parse(localStorage.getItem("articles") || "[]");
+    set({ articles: local, hydrated: true });
   },
 
-  // ➕ Add article
+  // add article
   addArticle: (article) => {
     const updated = [article, ...get().articles];
-
     localStorage.setItem("articles", JSON.stringify(updated));
     set({ articles: updated });
   },
 
-  // ✏️ Update article
+  // update article
   updateArticle: (id, updates) => {
     const updated = get().articles.map((a) =>
       a.id === id ? { ...a, ...updates } : a
@@ -62,39 +53,59 @@ export const useArticleStore = create<Store>((set, get) => ({
     set({ articles: updated });
   },
 
-  // ❌ Delete article
+  // delete article
   deleteArticle: (id) => {
     const updated = get().articles.filter((a) => a.id !== id);
-
     localStorage.setItem("articles", JSON.stringify(updated));
     set({ articles: updated });
   },
 
-  // 🟢 Published articles
+  // published
   getPublished: () => {
     return get().articles.filter(
       (a) => a.status === "published"
     );
   },
 
-  // 🟡 Drafts
+  // drafts
   getDrafts: () => {
     return get().articles.filter(
       (a) => a.status === "draft"
     );
   },
 
-  // 🟠 Pending review
+  // pending
   getPending: () => {
     return get().articles.filter(
       (a) => a.status === "pending"
     );
   },
 
-  // 🔥 Trending articles
+  // trending
   getTrending: () => {
     return get().articles.filter(
       (a) => a.trending && a.status === "published"
     );
+  },
+
+  // featured (auto-pick best article)
+  getFeatured: () => {
+    const published = get().articles.filter(
+      (a) => a.status === "published"
+    );
+
+    const sorted = [...published].sort((a, b) => {
+      const scoreA =
+        (a.trending ? 2 : 0) +
+        new Date(a.createdAt).getTime();
+
+      const scoreB =
+        (b.trending ? 2 : 0) +
+        new Date(b.createdAt).getTime();
+
+      return scoreB - scoreA;
+    });
+
+    return sorted[0];
   },
 }));
