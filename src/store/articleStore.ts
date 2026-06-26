@@ -17,33 +17,29 @@ type Store = {
   getDrafts: () => Article[];
   getPending: () => Article[];
   getTrending: () => Article[];
-  getFeatured: () => Article;
+  getFeatured: () => Article | undefined;
 };
 
 export const useArticleStore = create<Store>((set, get) => ({
   articles: [],
   hydrated: false,
 
-  // load from localStorage
   load: () => {
     const local = JSON.parse(localStorage.getItem("articles") || "[]");
     set({ articles: local });
   },
 
-  // hydrate (recommended)
   hydrate: () => {
     const local = JSON.parse(localStorage.getItem("articles") || "[]");
     set({ articles: local, hydrated: true });
   },
 
-  // add article
   addArticle: (article) => {
     const updated = [article, ...get().articles];
     localStorage.setItem("articles", JSON.stringify(updated));
     set({ articles: updated });
   },
 
-  // update article
   updateArticle: (id, updates) => {
     const updated = get().articles.map((a) =>
       a.id === id ? { ...a, ...updates } : a
@@ -53,57 +49,49 @@ export const useArticleStore = create<Store>((set, get) => ({
     set({ articles: updated });
   },
 
-  // delete article
   deleteArticle: (id) => {
     const updated = get().articles.filter((a) => a.id !== id);
     localStorage.setItem("articles", JSON.stringify(updated));
     set({ articles: updated });
   },
 
-  // published
   getPublished: () => {
-    return get().articles.filter(
-      (a) => a.status === "published"
-    );
+    return get().articles.filter((a) => a.status === "published");
   },
 
-  // drafts
   getDrafts: () => {
-    return get().articles.filter(
-      (a) => a.status === "draft"
-    );
+    return get().articles.filter((a) => a.status === "draft");
   },
 
-  // pending
   getPending: () => {
-    return get().articles.filter(
-      (a) => a.status === "pending"
-    );
+    return get().articles.filter((a) => a.status === "pending");
   },
 
-  // trending
   getTrending: () => {
-    return get().articles.filter(
-      (a) => a.trending && a.status === "published"
-    );
+    return get()
+      .articles
+      .filter((a) => a.status === "published")
+      .sort((a, b) => {
+        const score = (x: any) =>
+          (x.trending ? 3 : 0) +
+          new Date(x.createdAt).getTime();
+
+        return score(b) - score(a);
+      });
   },
 
-  // featured (auto-pick best article)
   getFeatured: () => {
     const published = get().articles.filter(
       (a) => a.status === "published"
     );
 
     const sorted = [...published].sort((a, b) => {
-      const scoreA =
-        (a.trending ? 2 : 0) +
-        new Date(a.createdAt).getTime();
+      const score = (x: any) =>
+        (x.trending ? 3 : 0) +
+        (x.featured ? 5 : 0) +
+        new Date(x.createdAt).getTime();
 
-      const scoreB =
-        (b.trending ? 2 : 0) +
-        new Date(b.createdAt).getTime();
-
-      return scoreB - scoreA;
+      return score(b) - score(a);
     });
 
     return sorted[0];
