@@ -1,39 +1,34 @@
 "use client";
 
-import { useState } from "react";
-import Link from "next/link";
 import { useArticleStore } from "@/src/store/articleStore";
+import Link from "next/link";
 
 export default function SearchBar() {
-  const { articles } = useArticleStore();
-  const [query, setQuery] = useState("");
+  const { searchQuery, setSearchQuery, getFiltered } =
+    useArticleStore();
 
-  const results = articles.filter((a) =>
-    a.title.toLowerCase().includes(query.toLowerCase())
-  );
+  const results = getFiltered();
 
   return (
     <div className="mb-10">
 
-      {/* INPUT */}
+
       <input
-        value={query}
-        onChange={(e) => setQuery(e.target.value)}
+        value={searchQuery}
+        onChange={(e) => setSearchQuery(e.target.value)}
         placeholder="Search articles..."
         className="w-full border rounded-lg px-4 py-3"
       />
 
-      {/* RESULTS */}
-      {query && (
-        <div className="mt-4 grid gap-3">
-
+      {searchQuery && (
+        <div className="mt-4 space-y-3">
           {results.map((article) => (
             <Link
               key={article.id}
               href={`/articles/${article.slug}`}
-              className="border p-4 rounded hover:shadow"
+              className="block border p-4 rounded hover:shadow"
             >
-              <p className="text-sm text-gray-500">
+              <p className="text-xs text-gray-500">
                 {article.category}
               </p>
 
@@ -46,7 +41,6 @@ export default function SearchBar() {
               </p>
             </Link>
           ))}
-
         </div>
       )}
 
