@@ -14,7 +14,7 @@ export default function Home() {
 
   const published = getPublished();
 
-  const featured = published[0];
+  const featured = useArticleStore.getState().getFeatured;
   const rest = published.slice(1);
 
   if (!featured) {
