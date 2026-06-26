@@ -10,29 +10,21 @@ import SearchBar from "@/src/components/SearchBar";
 import { useArticleStore } from "@/src/store/articleStore";
 
 export default function Home() {
-  const { getPublished } = useArticleStore();
+  const { getPublished, getFeatured } = useArticleStore();
 
   const published = getPublished();
+  const featured = getFeatured();
 
-  const featured = useArticleStore.getState().getFeatured;
-  const rest = published.slice(1);
-
-  if (!featured) {
-    return (
-      <main className="max-w-6xl mx-auto px-6 py-10">
-        <p>No published articles yet.</p>
-      </main>
-    );
-  }
+  const rest = published.filter((a) => a.id !== featured?.id);
 
   return (
     <main className="max-w-6xl mx-auto px-6 py-10">
 
-      <div className="mb-8">
-        <SearchBar />
-      </div>
+      <SearchBar />
 
-      <FeaturedSection featured={featured} />
+      {featured && (
+        <FeaturedSection featured={featured} />
+      )}
 
       <TrendingSection />
 
