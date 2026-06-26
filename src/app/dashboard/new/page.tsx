@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { useArticleStore } from "@/src/store/articleStore";
+import { uploadImage } from "@/src/lib/uploadImage";
 import ArticlePreview from "@/src/components/dashboard/ArticlePreview";
 
 export default function NewArticlePage() {
@@ -15,12 +16,13 @@ export default function NewArticlePage() {
   const [category, setCategory] = useState("");
   const [author, setAuthor] = useState("");
   const [coverImage, setCoverImage] = useState("");
+  const [uploading, setUploading] = useState(false);
 
   const handleSubmit = (status: "draft" | "pending") => {
-    if (!title.trim()) return; // 🔥 FIX 1: prevent empty articles
+    if (!title.trim()) return;
 
     const newArticle = {
-      id: crypto.randomUUID(), // 🔥 FIX 2: better unique ID
+      id: crypto.randomUUID(),
       title,
       excerpt,
       content,
@@ -31,10 +33,10 @@ export default function NewArticlePage() {
         .toLowerCase()
         .trim()
         .replace(/\s+/g, "-")
-        .replace(/[^\w-]/g, ""), // 🔥 FIX 3: safer slug
+        .replace(/[^\w-]/g, ""),
       createdAt: new Date().toISOString().split("T")[0],
       status,
-      trending: false, // 🔥 important for later sections
+      trending: false,
     };
 
     addArticle(newArticle);
@@ -86,12 +88,29 @@ export default function NewArticlePage() {
           onChange={(e) => setAuthor(e.target.value)}
         />
 
+        {/* CLOUDINARY UPLOAD */}
         <input
+          type="file"
+          accept="image/*"
           className="w-full border p-3 rounded"
-          placeholder="Cover Image URL"
-          value={coverImage}
-          onChange={(e) => setCoverImage(e.target.value)}
+          onChange={async (e) => {
+            const file = e.target.files?.[0];
+            if (!file) return;
+
+            setUploading(true);
+
+            const url = await uploadImage(file);
+            setCoverImage(url);
+
+            setUploading(false);
+          }}
         />
+
+        {uploading && (
+          <p className="text-sm text-gray-500">
+            Uploading image...
+          </p>
+        )}
 
         <div className="flex gap-4 pt-4">
 
