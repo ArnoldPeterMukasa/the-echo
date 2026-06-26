@@ -3,7 +3,6 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { useArticleStore } from "@/src/store/articleStore";
-import { uploadImage } from "@/src/lib/uploadImage";
 import ArticlePreview from "@/src/components/dashboard/ArticlePreview";
 
 export default function NewArticlePage() {
@@ -40,7 +39,6 @@ export default function NewArticlePage() {
     };
 
     addArticle(newArticle);
-
     router.push("/dashboard");
   };
 
@@ -99,9 +97,11 @@ export default function NewArticlePage() {
 
             setUploading(true);
 
-            const url = await uploadImage(file);
-            setCoverImage(url);
+            const { uploadImage } = await import("@/src/lib/uploadImage");
 
+            const url = await uploadImage(file);
+
+            setCoverImage(url);
             setUploading(false);
           }}
         />
@@ -110,6 +110,15 @@ export default function NewArticlePage() {
           <p className="text-sm text-gray-500">
             Uploading image...
           </p>
+        )}
+
+        {/* IMAGE PREVIEW */}
+        {coverImage && (
+          <img
+            src={coverImage}
+            alt="Cover preview"
+            className="w-full rounded-lg max-h-[300px] object-cover"
+          />
         )}
 
         <div className="flex gap-4 pt-4">
