@@ -1,12 +1,17 @@
 "use client";
 
 import { useArticleStore } from "@/src/store/articleStore";
+import Link from "next/link";
 
 export default function CategorySection() {
   const { articles } = useArticleStore();
 
   const categories = Array.from(
-    new Set(articles.map((a) => a.category))
+    new Set(
+      articles
+        .map((a) => a.category)
+        .filter(Boolean)
+    )
   );
 
   return (
@@ -19,12 +24,13 @@ export default function CategorySection() {
       <div className="flex flex-wrap gap-3">
 
         {categories.map((cat) => (
-          <span
+          <Link
             key={cat}
-            className="px-4 py-2 border rounded-full text-sm"
+            href={`/category/${cat.toLowerCase()}`}
+            className="px-4 py-2 border rounded-full text-sm hover:bg-black hover:text-white transition"
           >
             {cat}
-          </span>
+          </Link>
         ))}
 
       </div>
