@@ -46,7 +46,11 @@ export default function EditArticlePage() {
       category,
       author,
       coverImage,
-      slug: title.toLowerCase().replace(/\s+/g, "-"),
+      slug: title
+        .toLowerCase()
+        .trim()
+        .replace(/\s+/g, "-")
+        .replace(/[^\w-]/g, ""),
     });
 
     router.push("/dashboard");
@@ -63,39 +67,53 @@ export default function EditArticlePage() {
 
         <input
           className="w-full border p-3 rounded"
+          placeholder="Title"
           value={title}
           onChange={(e) => setTitle(e.target.value)}
         />
 
         <input
           className="w-full border p-3 rounded"
+          placeholder="Excerpt"
           value={excerpt}
           onChange={(e) => setExcerpt(e.target.value)}
         />
 
         <textarea
           className="w-full border p-3 rounded h-40"
+          placeholder="Content"
           value={content}
           onChange={(e) => setContent(e.target.value)}
         />
 
         <input
           className="w-full border p-3 rounded"
+          placeholder="Category"
           value={category}
           onChange={(e) => setCategory(e.target.value)}
         />
 
         <input
           className="w-full border p-3 rounded"
+          placeholder="Author"
           value={author}
           onChange={(e) => setAuthor(e.target.value)}
         />
 
         <input
           className="w-full border p-3 rounded"
+          placeholder="Cover Image URL"
           value={coverImage}
           onChange={(e) => setCoverImage(e.target.value)}
         />
+
+        {coverImage && (
+          <img
+            src={coverImage}
+            alt="preview"
+            className="w-full rounded-lg max-h-[300px] object-cover"
+          />
+        )}
 
         <button
           onClick={handleUpdate}
