@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { useArticleStore } from "@/src/store/articleStore";
+import { uploadImage } from "@/src/lib/uploadImage";
 import ArticlePreview from "@/src/components/dashboard/ArticlePreview";
 
 export default function NewArticlePage() {
@@ -46,7 +47,7 @@ export default function NewArticlePage() {
     <main className="max-w-3xl mx-auto px-6 py-12">
 
       <h1 className="text-4xl font-bold mb-8">
-        Create New Article
+        Create Article
       </h1>
 
       <div className="space-y-4">
@@ -97,11 +98,9 @@ export default function NewArticlePage() {
 
             setUploading(true);
 
-            const { uploadImage } = await import("@/src/lib/uploadImage");
-
             const url = await uploadImage(file);
-
             setCoverImage(url);
+
             setUploading(false);
           }}
         />
@@ -112,11 +111,9 @@ export default function NewArticlePage() {
           </p>
         )}
 
-        {/* IMAGE PREVIEW */}
         {coverImage && (
           <img
             src={coverImage}
-            alt="Cover preview"
             className="w-full rounded-lg max-h-[300px] object-cover"
           />
         )}
@@ -134,7 +131,7 @@ export default function NewArticlePage() {
             onClick={() => handleSubmit("pending")}
             className="px-5 py-2 bg-black text-white rounded"
           >
-            Submit for Review
+            Submit
           </button>
 
         </div>
