@@ -27,6 +27,8 @@ type Store = {
   getFiltered: () => Article[];
 
   incrementViews: (id: string) => void;
+  getTotalViews: () => number;
+  getTopArticle: () => Article | undefined;
 };
 
 export const useArticleStore = create<Store>((set, get) => ({
@@ -68,13 +70,36 @@ export const useArticleStore = create<Store>((set, get) => ({
     set({ articles: updated });
   },
 
-  incrementViews: (id) => {  //views traking
+  incrementViews: (id) => {
     const updated = get().articles.map((a) =>
-      a.id === id ? { ...a, views: (a.views || 0) + 1 } : a
+      a.id === id
+        ? { ...a, views: (a.views || 0) + 1 }
+        : a
     );
 
     localStorage.setItem("articles", JSON.stringify(updated));
     set({ articles: updated });
+  },
+
+  getTotalViews: () => {
+    return get().articles.reduce(
+      (sum, a) => sum + (a.views || 0),
+      0
+    );
+  },
+
+  getTopArticle: () => {
+    const published = get().articles.filter(
+      (a) => a.status === "published"
+    );
+
+    if (published.length === 0) return undefined;
+
+    return published.reduce((top, article) => {
+      return (article.views || 0) > (top.views || 0)
+        ? article
+        : top;
+    });
   },
 
   getPublished: () =>
@@ -96,9 +121,32 @@ export const useArticleStore = create<Store>((set, get) => ({
       (a) => a.status === "published"
     );
 
-    return published.sort(
-      (a, b) => (b.views || 0) - (a.views || 0)
-    )[0];
+    if (published.length === 0) return undefined;
+
+    const scored = published.map((article) => {
+      let score = 0;
+
+      if (article.featured) score += 100;
+      if (article.trending) score += 50;
+      score += article.views || 0;
+
+      const age =
+        Date.now() - new Date(article.createdAt).getTime();
+
+      const ageInDays =
+        age / (1000 * 60 * 60 * 24);
+
+      score += Math.max(30 - ageInDays, 0);
+
+      return {
+        ...article,
+        score,
+      };
+    });
+
+    scored.sort((a, b) => b.score - a.score);
+
+    return scored[0];
   },
 
   getFiltered: () => {
@@ -114,18 +162,5 @@ export const useArticleStore = create<Store>((set, get) => ({
         a.author?.toLowerCase().includes(q)
       );
     });
-  },
-
-  getTotalViews: () => {
-    return get().articles.reduce(
-      (sum, a) => sum + (a.views || 0),
-      0
-    );
-  },
-
-  getTopArticle: ()=>{
-    return get().articles
-    .filter((a)=> a.status === "published")
-    .sort((a, b) => (b.views || 0) - (a.views || 0))[0];
   },
 }));
