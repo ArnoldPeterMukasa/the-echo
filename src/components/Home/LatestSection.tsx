@@ -2,48 +2,30 @@
 
 import Link from "next/link";
 
-type Props = {
+export default function LatestSection({
+  articles,
+}: {
   articles: any[];
-};
-
-export default function LatestSection({ articles }: Props) {
-  if (!articles || articles.length === 0) return null;
-
+}) {
   return (
-    <section className="mb-16">
-
-      <h2 className="text-2xl font-semibold mb-6">
+    <section className="mt-10">
+      <h2 className="text-2xl font-bold mb-4">
         Latest Articles
       </h2>
 
-      <div className="grid md:grid-cols-2 gap-6">
-
-        {articles.map((article) => (
+      <div className="space-y-4">
+        {articles.map((a) => (
           <Link
-            key={article.id}
-            href={`/articles/${article.slug}`}
-            className="border rounded-lg p-5 hover:shadow-md transition"
+            key={a.id}
+            href={`/articles/${a.slug}`}
+            className="block border p-4 rounded hover:shadow"
           >
-
-            <p className="text-xs text-gray-500 uppercase mb-2">
-              {article.category}
+            <h3 className="font-bold">{a.title}</h3>
+            <p className="text-sm text-gray-600">
+              {a.excerpt}
             </p>
-
-            <h3 className="text-xl font-bold">
-              {article.title}
-            </h3>
-
-            <p className="text-gray-600 mt-2">
-              {article.excerpt}
-            </p>
-
-            <p className="text-xs text-gray-400 mt-3">
-              {article.author} • {article.createdAt}
-            </p>
-
           </Link>
         ))}
-
       </div>
     </section>
   );
