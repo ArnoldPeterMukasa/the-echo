@@ -16,6 +16,9 @@ export default function NewArticlePage() {
   const [category, setCategory] = useState("");
   const [author, setAuthor] = useState("");
   const [coverImage, setCoverImage] = useState("");
+
+  const [featured, setFeatured] = useState(false);
+
   const [uploading, setUploading] = useState(false);
 
   const handleSubmit = (status: "draft" | "pending") => {
@@ -29,17 +32,23 @@ export default function NewArticlePage() {
       category,
       author,
       coverImage,
+
+      featured,
+      views: 0,
+      trending: false,
+
       slug: title
         .toLowerCase()
         .trim()
         .replace(/\s+/g, "-")
         .replace(/[^\w-]/g, ""),
+
       createdAt: new Date().toISOString().split("T")[0],
       status,
-      trending: false,
     };
 
     addArticle(newArticle);
+
     router.push("/dashboard");
   };
 
@@ -87,6 +96,17 @@ export default function NewArticlePage() {
           onChange={(e) => setAuthor(e.target.value)}
         />
 
+        {/* FEATURED ARTICLE */}
+        <label className="flex items-center gap-3 border rounded p-3">
+          <input
+            type="checkbox"
+            checked={featured}
+            onChange={(e) => setFeatured(e.target.checked)}
+          />
+
+          <span>Feature this article on the homepage</span>
+        </label>
+
         {/* CLOUDINARY UPLOAD */}
         <input
           type="file"
@@ -99,6 +119,7 @@ export default function NewArticlePage() {
             setUploading(true);
 
             const url = await uploadImage(file);
+
             setCoverImage(url);
 
             setUploading(false);
@@ -114,6 +135,7 @@ export default function NewArticlePage() {
         {coverImage && (
           <img
             src={coverImage}
+            alt="Cover preview"
             className="w-full rounded-lg max-h-[300px] object-cover"
           />
         )}

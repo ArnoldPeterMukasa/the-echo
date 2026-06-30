@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 import { useArticleStore } from "@/src/store/articleStore";
+import { uploadImage } from "@/src/lib/uploadImage";
 
 export default function EditArticlePage() {
   const { id } = useParams();
@@ -19,42 +20,28 @@ export default function EditArticlePage() {
   const [author, setAuthor] = useState("");
   const [coverImage, setCoverImage] = useState("");
 
-  // Load existing article into form
-  useEffect(() => {
-    if (article) {
-      setTitle(article.title || "");
-      setExcerpt(article.excerpt || "");
-      setContent(article.content || "");
-      setCategory(article.category || "");
-      setAuthor(article.author || "");
-      setCoverImage(article.coverImage || "");
-    }
-  }, [article]);
+  const [featured, setFeatured] = useState(false);
+  const [trending, setTrending] = useState(false);
 
-  const handleUpdate = () => {
+  useEffect(() => {
     if (!article) return;
 
-    updateArticle(article.id, {
-      title,
-      excerpt,
-      content,
-      category,
-      author,
-      coverImage,
-      slug: title
-        .toLowerCase()
-        .trim()
-        .replace(/\s+/g, "-")
-        .replace(/[^\w-]/g, ""),
-    });
-
-    router.push("/dashboard");
-  };
+    setTitle(article.title);
+    setExcerpt(article.excerpt);
+    setContent(article.content);
+    setCategory(article.category);
+    setAuthor(article.author);
+    setCoverImage(article.coverImage);
+    setFeatured(article.featured ?? false);
+    setTrending(article.trending ?? false);
+  }, [article]);
 
   if (!article) {
     return (
-      <main className="max-w-3xl mx-auto px-6 py-12">
-        <h1 className="text-xl font-bold">Article not found</h1>
+      <main className="max-w-3xl mx-auto py-12">
+        <h1 className="text-2xl font-bold">
+          Article not found
+        </h1>
       </main>
     );
   }
@@ -62,57 +49,99 @@ export default function EditArticlePage() {
   return (
     <main className="max-w-3xl mx-auto px-6 py-12">
 
-      <h1 className="text-3xl font-bold mb-6">
+      <h1 className="text-4xl font-bold mb-8">
         Edit Article
       </h1>
 
       <div className="space-y-4">
 
         <input
-          className="w-full border p-3 rounded"
+          className="w-full border rounded p-3"
           value={title}
           onChange={(e) => setTitle(e.target.value)}
-          placeholder="Title"
         />
 
         <input
-          className="w-full border p-3 rounded"
+          className="w-full border rounded p-3"
           value={excerpt}
           onChange={(e) => setExcerpt(e.target.value)}
-          placeholder="Excerpt"
         />
 
         <textarea
-          className="w-full border p-3 rounded h-40"
+          className="w-full border rounded p-3 h-40"
           value={content}
           onChange={(e) => setContent(e.target.value)}
-          placeholder="Content"
         />
 
         <input
-          className="w-full border p-3 rounded"
+          className="w-full border rounded p-3"
           value={category}
           onChange={(e) => setCategory(e.target.value)}
-          placeholder="Category"
         />
 
         <input
-          className="w-full border p-3 rounded"
+          className="w-full border rounded p-3"
           value={author}
           onChange={(e) => setAuthor(e.target.value)}
-          placeholder="Author"
         />
 
         <input
-          className="w-full border p-3 rounded"
-          value={coverImage}
-          onChange={(e) => setCoverImage(e.target.value)}
-          placeholder="Cover Image URL"
+          type="file"
+          accept="image/*"
+          className="w-full border rounded p-3"
+          onChange={async (e) => {
+            const file = e.target.files?.[0];
+            if (!file) return;
+
+            const url = await uploadImage(file);
+            setCoverImage(url);
+          }}
         />
 
+        {coverImage && (
+          <img
+            src={coverImage}
+            alt="Cover"
+            className="w-full rounded-lg max-h-72 object-cover"
+          />
+        )}
+
+        <label className="flex items-center gap-2">
+          <input
+            type="checkbox"
+            checked={featured}
+            onChange={(e) => setFeatured(e.target.checked)}
+          />
+
+          Featured Article
+        </label>
+
+        <label className="flex items-center gap-2">
+          <input
+            type="checkbox"
+            checked={trending}
+            onChange={(e) => setTrending(e.target.checked)}
+          />
+
+          Trending Article
+        </label>
+
         <button
-          onClick={handleUpdate}
-          className="px-5 py-2 bg-black text-white rounded"
+          onClick={() => {
+            updateArticle(article.id, {
+              title,
+              excerpt,
+              content,
+              category,
+              author,
+              coverImage,
+              featured,
+              trending,
+            });
+
+            router.push("/dashboard");
+          }}
+          className="px-6 py-3 bg-black text-white rounded"
         >
           Save Changes
         </button>
