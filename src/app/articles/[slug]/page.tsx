@@ -10,7 +10,6 @@ export default function ArticlePage() {
 
   const article = articles.find((a) => a.slug === slug);
 
-  // ✅ KEEP: analytics logic
   useEffect(() => {
     if (article?.id) {
       incrementViews(article.id);
@@ -52,6 +51,7 @@ export default function ArticlePage() {
       {article.coverImage && (
         <img
           src={article.coverImage}
+          loading="lazy"
           className="w-full mt-6 sm:mt-8 rounded-xl max-h-[420px] object-cover"
         />
       )}
