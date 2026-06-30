@@ -1,16 +1,13 @@
 "use client";
 
-import FeaturedSection from "@/src/components/Home/FeaturedSection";
+import HeroSection from "@/src/components/Home/HeroSection";
 import LatestSection from "@/src/components/Home/LatestSection";
 import TrendingSection from "@/src/components/Home/TrendingSection";
 import CategorySection from "@/src/components/Home/CategorySection";
 import NewsletterSection from "@/src/components/Home/NewsletterSection";
 import SearchBar from "@/src/components/SearchBar";
-import type { ComponentType } from "react";
 
 import { useArticleStore } from "@/src/store/articleStore";
-
-const TrendingSectionComponent = TrendingSection as ComponentType<{ articles: any[] }>;
 
 export default function Home() {
   const {
@@ -18,51 +15,41 @@ export default function Home() {
     getFeatured,
     getTrending,
     getFiltered,
-    searchQuery,
   } = useArticleStore();
 
-  const isSearching = searchQuery.trim().length > 0;
-
-  const published = getPublished();
+  // 🔍 search-aware published articles
+  const published = getFiltered().filter(
+    (a) => a.status === "published"
+  );
 
   const featured = getFeatured();
-
   const trending = getTrending();
 
-  const latest = isSearching
-    ? getFiltered().filter((a) => a.status === "published")
-    : published.slice(1);
+  const rest = published.filter(
+    (a) => a.id !== featured?.id
+  );
 
   return (
-    <main className="max-w-6xl mx-auto px-6 py-10">
+    <main className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-10">
 
-      {/* SEARCH ALWAYS VISIBLE */}
       <SearchBar />
 
-      {/* EMPTY STATE */}
-      {published.length === 0 ? (
-        <p className="text-center text-gray-500">
-          No articles yet. Create your first one.
-        </p>
-      ) : (
-        <>
-          {/* FEATURED */}
-          {featured && (
-            <FeaturedSection featured={featured} />
-          )}
+      <HeroSection featured={featured} />
 
-          {/* TRENDING */}
-          {trending.length > 0 && (
-            <TrendingSectionComponent articles={trending} />
-          )}
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 lg:gap-12">
 
-          {/* LATEST / SEARCH RESULTS */}
-          <LatestSection articles={latest} />
+        <div className="lg:col-span-2">
+          <LatestSection articles={rest} />
+        </div>
 
-          <CategorySection />
-          <NewsletterSection />
-        </>
-      )}
+        <aside className="lg:col-span-1 space-y-8">
+          <TrendingSection articles={trending} />
+        </aside>
+
+      </div>
+
+      <CategorySection />
+      <NewsletterSection />
 
     </main>
   );
