@@ -14,6 +14,7 @@ export default function ArticleCard({
   return (
     <Link href={`/articles/${slug}`}>
       <div className="border rounded-lg p-5 hover:shadow-md transition">
+
         <h2 className="text-2xl font-bold">
           {title}
         </h2>
@@ -21,6 +22,7 @@ export default function ArticleCard({
         <p className="text-gray-600 mt-2">
           {excerpt}
         </p>
+
       </div>
     </Link>
   );
