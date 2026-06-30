@@ -16,12 +16,11 @@ type Store = {
   updateArticle: (id: string, updates: Partial<Article>) => void;
   deleteArticle: (id: string) => void;
 
+  incrementViews: (id: string) => void;
+
   getPublished: () => Article[];
-  getDrafts: () => Article[];
-  getPending: () => Article[];
   getTrending: () => Article[];
   getFeatured: () => Article | undefined;
-
   getFiltered: () => Article[];
 };
 
@@ -40,9 +39,7 @@ export const useArticleStore = create<Store>((set, get) => ({
     set({ articles: local, hydrated: true });
   },
 
-  setSearchQuery: (q) => {
-    set({ searchQuery: q });
-  },
+  setSearchQuery: (q) => set({ searchQuery: q }),
 
   addArticle: (article) => {
     const updated = [article, ...get().articles];
@@ -65,40 +62,38 @@ export const useArticleStore = create<Store>((set, get) => ({
     set({ articles: updated });
   },
 
+  // 🔥 NEW: VIEW TRACKING
+  incrementViews: (id) => {
+    const updated = get().articles.map((a) =>
+      a.id === id
+        ? { ...a, views: (a.views || 0) + 1 }
+        : a
+    );
+
+    localStorage.setItem("articles", JSON.stringify(updated));
+    set({ articles: updated });
+  },
+
   getPublished: () =>
     get().articles.filter((a) => a.status === "published"),
 
-  getDrafts: () =>
-    get().articles.filter((a) => a.status === "draft"),
-
-  getPending: () =>
-    get().articles.filter((a) => a.status === "pending"),
-
   getTrending: () =>
-    get().articles.filter(
-      (a) => a.status === "published" && a.trending
-    ),
+    get().articles
+      .filter((a) => a.status === "published")
+      .sort((a, b) => (b.views || 0) - (a.views || 0)),
 
-  // ⭐ SINGLE CLEAN FEATURED ALGORITHM
   getFeatured: () => {
     const published = get().articles.filter(
       (a) => a.status === "published"
     );
 
-    if (published.length === 0) return undefined;
+    if (!published.length) return undefined;
 
-    const scored = published.map((a) => ({
-      ...a,
-      score:
-        (a.trending ? 3 : 0) +
-        (a.featured ? 5 : 0) +
-        new Date(a.createdAt).getTime() / 1000000,
-    }));
-
-    return scored.sort((a, b) => b.score - a.score)[0];
+    return [...published].sort(
+      (a, b) => (b.views || 0) - (a.views || 0)
+    )[0];
   },
 
-  // 🔍 SEARCH (GLOBAL)
   getFiltered: () => {
     const q = get().searchQuery.toLowerCase().trim();
 
