@@ -1,3 +1,5 @@
+"use client";
+
 import { create } from "zustand";
 
 type Article = any;
@@ -16,18 +18,24 @@ type Store = {
   updateArticle: (id: string, updates: Partial<Article>) => void;
   deleteArticle: (id: string) => void;
 
-  incrementViews: (id: string) => void;
-
   getPublished: () => Article[];
+  getDrafts: () => Article[];
+  getPending: () => Article[];
   getTrending: () => Article[];
   getFeatured: () => Article | undefined;
+
   getFiltered: () => Article[];
+
+  incrementViews: (id: string) => void;
 };
 
 export const useArticleStore = create<Store>((set, get) => ({
   articles: [],
   hydrated: false,
+
   searchQuery: "",
+
+  setSearchQuery: (q) => set({ searchQuery: q }),
 
   load: () => {
     const local = JSON.parse(localStorage.getItem("articles") || "[]");
@@ -38,8 +46,6 @@ export const useArticleStore = create<Store>((set, get) => ({
     const local = JSON.parse(localStorage.getItem("articles") || "[]");
     set({ articles: local, hydrated: true });
   },
-
-  setSearchQuery: (q) => set({ searchQuery: q }),
 
   addArticle: (article) => {
     const updated = [article, ...get().articles];
@@ -62,12 +68,9 @@ export const useArticleStore = create<Store>((set, get) => ({
     set({ articles: updated });
   },
 
-  // 🔥 NEW: VIEW TRACKING
-  incrementViews: (id) => {
+  incrementViews: (id) => {  //views traking
     const updated = get().articles.map((a) =>
-      a.id === id
-        ? { ...a, views: (a.views || 0) + 1 }
-        : a
+      a.id === id ? { ...a, views: (a.views || 0) + 1 } : a
     );
 
     localStorage.setItem("articles", JSON.stringify(updated));
@@ -76,6 +79,12 @@ export const useArticleStore = create<Store>((set, get) => ({
 
   getPublished: () =>
     get().articles.filter((a) => a.status === "published"),
+
+  getDrafts: () =>
+    get().articles.filter((a) => a.status === "draft"),
+
+  getPending: () =>
+    get().articles.filter((a) => a.status === "pending"),
 
   getTrending: () =>
     get().articles
@@ -87,9 +96,7 @@ export const useArticleStore = create<Store>((set, get) => ({
       (a) => a.status === "published"
     );
 
-    if (!published.length) return undefined;
-
-    return [...published].sort(
+    return published.sort(
       (a, b) => (b.views || 0) - (a.views || 0)
     )[0];
   },
@@ -107,5 +114,18 @@ export const useArticleStore = create<Store>((set, get) => ({
         a.author?.toLowerCase().includes(q)
       );
     });
+  },
+
+  getTotalViews: () => {
+    return get().articles.reduce(
+      (sum, a) => sum + (a.views || 0),
+      0
+    );
+  },
+
+  getTopArticle: ()=>{
+    return get().articles
+    .filter((a)=> a.status === "published")
+    .sort((a, b) => (b.views || 0) - (a.views || 0))[0];
   },
 }));
