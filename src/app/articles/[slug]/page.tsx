@@ -1,31 +1,36 @@
 "use client";
 
-import Image from "next/image";
+import { useEffect } from "react";
 import { useParams } from "next/navigation";
 import { useArticleStore } from "@/src/store/articleStore";
 
 export default function ArticlePage() {
   const { slug } = useParams();
-  const { articles } = useArticleStore();
+  const { articles, incrementViews } = useArticleStore();
 
   const article = articles.find((a) => a.slug === slug);
+
+  useEffect(() => {
+    if (article?.id) {
+      incrementViews(article.id);
+    }
+  }, [article?.id]);
 
   if (!article) {
     return (
       <main className="max-w-3xl mx-auto px-6 py-16">
-        <h1 className="text-2xl font-bold">Article not found</h1>
+        <h1>Article not found</h1>
       </main>
     );
   }
 
-  
   const words = article.content?.split(" ").length || 0;
   const readingTime = Math.max(1, Math.ceil(words / 200));
 
   return (
     <main className="max-w-4xl mx-auto px-6 py-14">
 
-      <p className="text-sm uppercase text-gray-500">
+      <p className="text-sm text-gray-500 uppercase">
         {article.category}
       </p>
 
@@ -33,25 +38,22 @@ export default function ArticlePage() {
         {article.title}
       </h1>
 
-      <div className="text-sm text-gray-500 mt-3">
-        By {article.author} • {article.createdAt} • {readingTime} min read
+      <div className="text-sm text-gray-500 mt-2">
+        By {article.author} • {article.views || 0} views • {readingTime} min read
       </div>
 
       {article.coverImage && (
-        <div className="mt-8">
-          <img
-            src={article.coverImage}
-            alt={article.title}
-            className="w-full rounded-xl max-h-[500px] object-cover"
-          />
-        </div>
+        <img
+          src={article.coverImage}
+          className="w-full mt-8 rounded-xl object-cover"
+        />
       )}
 
       <p className="mt-8 text-xl text-gray-600">
         {article.excerpt}
       </p>
 
-      <div className="mt-8 text-lg leading-8 whitespace-pre-line">
+      <div className="mt-6 whitespace-pre-line text-lg">
         {article.content}
       </div>
 
