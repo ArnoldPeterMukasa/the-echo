@@ -19,26 +19,21 @@ export default function EditArticlePage() {
   const [author, setAuthor] = useState("");
   const [coverImage, setCoverImage] = useState("");
 
+  // Load existing article into form
   useEffect(() => {
-    if (!article) return;
-
-    setTitle(article.title || "");
-    setExcerpt(article.excerpt || "");
-    setContent(article.content || "");
-    setCategory(article.category || "");
-    setAuthor(article.author || "");
-    setCoverImage(article.coverImage || "");
+    if (article) {
+      setTitle(article.title || "");
+      setExcerpt(article.excerpt || "");
+      setContent(article.content || "");
+      setCategory(article.category || "");
+      setAuthor(article.author || "");
+      setCoverImage(article.coverImage || "");
+    }
   }, [article]);
 
-  if (!article) {
-    return (
-      <main className="max-w-3xl mx-auto px-6 py-16">
-        <h1 className="text-2xl font-bold">Article not found</h1>
-      </main>
-    );
-  }
-
   const handleUpdate = () => {
+    if (!article) return;
+
     updateArticle(article.id, {
       title,
       excerpt,
@@ -56,10 +51,18 @@ export default function EditArticlePage() {
     router.push("/dashboard");
   };
 
+  if (!article) {
+    return (
+      <main className="max-w-3xl mx-auto px-6 py-12">
+        <h1 className="text-xl font-bold">Article not found</h1>
+      </main>
+    );
+  }
+
   return (
     <main className="max-w-3xl mx-auto px-6 py-12">
 
-      <h1 className="text-3xl font-bold mb-8">
+      <h1 className="text-3xl font-bold mb-6">
         Edit Article
       </h1>
 
@@ -67,53 +70,45 @@ export default function EditArticlePage() {
 
         <input
           className="w-full border p-3 rounded"
-          placeholder="Title"
           value={title}
           onChange={(e) => setTitle(e.target.value)}
+          placeholder="Title"
         />
 
         <input
           className="w-full border p-3 rounded"
-          placeholder="Excerpt"
           value={excerpt}
           onChange={(e) => setExcerpt(e.target.value)}
+          placeholder="Excerpt"
         />
 
         <textarea
           className="w-full border p-3 rounded h-40"
-          placeholder="Content"
           value={content}
           onChange={(e) => setContent(e.target.value)}
+          placeholder="Content"
         />
 
         <input
           className="w-full border p-3 rounded"
-          placeholder="Category"
           value={category}
           onChange={(e) => setCategory(e.target.value)}
+          placeholder="Category"
         />
 
         <input
           className="w-full border p-3 rounded"
-          placeholder="Author"
           value={author}
           onChange={(e) => setAuthor(e.target.value)}
+          placeholder="Author"
         />
 
         <input
           className="w-full border p-3 rounded"
-          placeholder="Cover Image URL"
           value={coverImage}
           onChange={(e) => setCoverImage(e.target.value)}
+          placeholder="Cover Image URL"
         />
-
-        {coverImage && (
-          <img
-            src={coverImage}
-            alt="preview"
-            className="w-full rounded-lg max-h-[300px] object-cover"
-          />
-        )}
 
         <button
           onClick={handleUpdate}
