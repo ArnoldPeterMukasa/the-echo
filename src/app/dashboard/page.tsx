@@ -3,14 +3,11 @@
 import { useEffect } from "react";
 import Link from "next/link";
 import { useArticleStore } from "@/src/store/articleStore";
+import Analytics from "@/src/components/dashboard/Analytics";
 
 export default function DashboardPage() {
-  const {
-    articles,
-    hydrate,
-    updateArticle,
-    deleteArticle,
-  } = useArticleStore();
+  const { articles, hydrate, updateArticle, deleteArticle } =
+    useArticleStore();
 
   useEffect(() => {
     hydrate();
@@ -22,6 +19,9 @@ export default function DashboardPage() {
 
   return (
     <main className="max-w-6xl mx-auto px-6 py-12">
+
+      {/* ANALYTICS */}
+      <Analytics />
 
       {/* HEADER */}
       <div className="flex items-center justify-between mb-10">
@@ -86,7 +86,6 @@ export default function DashboardPage() {
               {/* ACTIONS */}
               <div className="flex gap-3 mt-4">
 
-                {/* EDIT BUTTON (ADDED) */}
                 <Link
                   href={`/dashboard/edit/${article.id}`}
                   className="px-3 py-1 text-sm border rounded"
