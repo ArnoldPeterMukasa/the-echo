@@ -2,33 +2,59 @@
 
 import Link from "next/link";
 
-export default function TrendingSection({
-  articles,
-}: {
+type Props = {
   articles: any[];
-}) {
-  if (!articles?.length) return null;
+};
+
+export default function TrendingSection({ articles }: Props) {
+  if (!articles || articles.length === 0) {
+    return (
+      <div className="border rounded-xl p-5">
+        <h2 className="text-lg font-bold mb-3">Trending</h2>
+        <p className="text-sm text-gray-500">No trending articles yet</p>
+      </div>
+    );
+  }
 
   return (
-    <section className="mt-10">
-      <h2 className="text-2xl font-bold mb-4">
-        Trending
+    <div className="border rounded-xl p-5">
+
+      <h2 className="text-lg font-bold mb-4">
+        🔥 Trending
       </h2>
 
-      <div className="grid gap-4 md:grid-cols-3">
-        {articles.slice(0, 6).map((a) => (
+      <div className="space-y-4">
+
+        {articles.slice(0, 5).map((article, index) => (
           <Link
-            key={a.id}
-            href={`/articles/${a.slug}`}
-            className="border p-4 rounded hover:shadow"
+            key={article.id}
+            href={`/articles/${article.slug}`}
+            className="flex gap-3 items-start hover:bg-gray-50 p-2 rounded transition"
           >
-            <h3 className="font-bold">{a.title}</h3>
-            <p className="text-sm text-gray-600">
-              {a.excerpt}
-            </p>
+
+            {/* RANK NUMBER */}
+            <div className="text-xl font-bold text-gray-400 w-6">
+              {index + 1}
+            </div>
+
+            {/* CONTENT */}
+            <div className="flex-1">
+
+              <h3 className="text-sm font-semibold line-clamp-2">
+                {article.title}
+              </h3>
+
+              <p className="text-xs text-gray-500 mt-1">
+                {article.views || 0} views • {article.category}
+              </p>
+
+            </div>
+
           </Link>
         ))}
+
       </div>
-    </section>
+
+    </div>
   );
 }
