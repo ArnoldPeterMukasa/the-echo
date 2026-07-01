@@ -20,6 +20,9 @@ export default function Home() {
   const trending = getTrending();
   const published = getPublished();
 
+  // 🔥 SEARCH INTEGRATION (ADDED HERE)
+  const filtered = getFiltered();
+
   const latest = published.filter(
     (a) => a.id !== featured?.id
   );
@@ -34,7 +37,10 @@ export default function Home() {
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-10">
 
         <div className="lg:col-span-2">
-          <LatestSection articles={latest} />
+          {/* 🔥 SEARCH OVERRIDE LOGIC */}
+          <LatestSection
+            articles={filtered.length > 0 ? filtered : latest}
+          />
         </div>
 
         <aside className="space-y-8">
