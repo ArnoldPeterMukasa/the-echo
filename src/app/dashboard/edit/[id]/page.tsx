@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 import { useArticleStore } from "@/src/store/articleStore";
+import { uploadImage } from "@/src/lib/uploadImage";
 
 export default function EditArticlePage() {
   const { id } = useParams();
@@ -19,7 +20,7 @@ export default function EditArticlePage() {
   const [author, setAuthor] = useState("");
   const [coverImage, setCoverImage] = useState("");
 
-  const [dirty, setDirty] = useState(false);
+  const [uploading, setUploading] = useState(false);
 
   useEffect(() => {
     if (!article) return;
@@ -32,45 +33,6 @@ export default function EditArticlePage() {
     setCoverImage(article.coverImage || "");
   }, [article]);
 
-  // mark changes
-  useEffect(() => {
-    setDirty(true);
-  }, [title, excerpt, content, category, author, coverImage]);
-
-  // AUTO SAVE every 3 seconds
-  useEffect(() => {
-    if (!article) return;
-
-    const interval = setInterval(() => {
-      if (!dirty) return;
-
-      updateArticle(article.id, {
-        title,
-        excerpt,
-        content,
-        category,
-        author,
-        coverImage,
-      });
-
-      setDirty(false);
-    }, 3000);
-
-    return () => clearInterval(interval);
-  }, [dirty, title, excerpt, content, category, author, coverImage]);
-
-  // warning before leaving
-  useEffect(() => {
-    const handler = (e: BeforeUnloadEvent) => {
-      if (!dirty) return;
-      e.preventDefault();
-      e.returnValue = "";
-    };
-
-    window.addEventListener("beforeunload", handler);
-    return () => window.removeEventListener("beforeunload", handler);
-  }, [dirty]);
-
   if (!article) {
     return (
       <main className="max-w-3xl mx-auto px-6 py-12">
@@ -79,18 +41,25 @@ export default function EditArticlePage() {
     );
   }
 
+  const handleUpdate = () => {
+    updateArticle(article.id, {
+      title,
+      excerpt,
+      content,
+      category,
+      author,
+      coverImage,
+    });
+
+    router.push("/dashboard");
+  };
+
   return (
     <main className="max-w-3xl mx-auto px-6 py-12">
 
-      <div className="flex items-center justify-between mb-6">
-        <h1 className="text-3xl font-bold">Edit Article</h1>
-
-        {dirty && (
-          <span className="text-sm text-orange-500">
-            Unsaved changes...
-          </span>
-        )}
-      </div>
+      <h1 className="text-3xl font-bold mb-6">
+        Edit Article
+      </h1>
 
       <div className="space-y-4">
 
@@ -129,12 +98,29 @@ export default function EditArticlePage() {
           placeholder="Author"
         />
 
+        {/* IMAGE UPLOAD (CLOUDINARY) */}
         <input
+          type="file"
+          accept="image/*"
           className="w-full border p-3 rounded"
-          value={coverImage}
-          onChange={(e) => setCoverImage(e.target.value)}
-          placeholder="Cover Image URL"
+          onChange={async (e) => {
+            const file = e.target.files?.[0];
+            if (!file) return;
+
+            setUploading(true);
+
+            const url = await uploadImage(file);
+            setCoverImage(url);
+
+            setUploading(false);
+          }}
         />
+
+        {uploading && (
+          <p className="text-sm text-gray-500">
+            Uploading image...
+          </p>
+        )}
 
         {coverImage && (
           <img
@@ -143,22 +129,11 @@ export default function EditArticlePage() {
           />
         )}
 
-        {/* MANUAL SAVE BUTTON (backup) */}
         <button
-          onClick={() => {
-            updateArticle(article.id, {
-              title,
-              excerpt,
-              content,
-              category,
-              author,
-              coverImage,
-            });
-            setDirty(false);
-          }}
+          onClick={handleUpdate}
           className="px-5 py-2 bg-black text-white rounded"
         >
-          Save Now
+          Save Changes
         </button>
 
       </div>
