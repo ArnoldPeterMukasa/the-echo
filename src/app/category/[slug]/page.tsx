@@ -5,58 +5,60 @@ import { useParams } from "next/navigation";
 import { useArticleStore } from "@/src/store/articleStore";
 
 export default function CategoryPage() {
-  const { slug } = useParams();
+  const { category } = useParams();
   const { articles } = useArticleStore();
+
+  const decodedCategory = decodeURIComponent(category as string);
 
   const filtered = articles.filter(
     (a) =>
       a.status === "published" &&
-      a.category?.toLowerCase() === String(slug).toLowerCase()
+      a.category?.toLowerCase() === decodedCategory.toLowerCase()
   );
 
-  return (
-    <main className="max-w-6xl mx-auto px-4 sm:px-6 py-10">
+  if (!filtered.length) {
+    return (
+      <main className="max-w-3xl mx-auto px-6 py-16 text-center">
+        <h1 className="text-2xl font-bold">No articles found</h1>
+        <p className="text-gray-500 mt-2">
+          No content in this category yet.
+        </p>
+      </main>
+    );
+  }
 
-      {/* HEADER */}
-      <h1 className="text-2xl sm:text-4xl font-bold capitalize mb-8">
-        {slug} Stories
+  return (
+    <main className="max-w-5xl mx-auto px-6 py-10">
+
+      <h1 className="text-3xl font-bold mb-2 capitalize">
+        {decodedCategory}
       </h1>
 
-      {/* GRID */}
-      {filtered.length === 0 ? (
-        <p className="text-gray-500">No articles found.</p>
-      ) : (
-        <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-          {filtered.map((article) => (
-            <Link
-              key={article.id}
-              href={`/articles/${article.slug}`}
-              className="border rounded-xl overflow-hidden hover:shadow-lg transition"
-            >
-              {article.coverImage && (
-                <img
-                  src={article.coverImage}
-                  className="w-full h-40 object-cover"
-                />
-              )}
+      <p className="text-gray-500 mb-8">
+        {filtered.length} article(s)
+      </p>
 
-              <div className="p-4">
-                <p className="text-xs text-gray-500 uppercase">
-                  {article.category}
-                </p>
+      <div className="grid gap-5">
+        {filtered.map((article) => (
+          <Link
+            key={article.id}
+            href={`/articles/${article.slug}`}
+            className="border rounded-xl p-5 hover:shadow transition"
+          >
+            <h2 className="text-xl font-semibold">
+              {article.title}
+            </h2>
 
-                <h2 className="font-bold text-lg mt-1 line-clamp-2">
-                  {article.title}
-                </h2>
+            <p className="text-sm text-gray-500 mt-1">
+              {article.excerpt}
+            </p>
 
-                <p className="text-sm text-gray-600 mt-2 line-clamp-3">
-                  {article.excerpt}
-                </p>
-              </div>
-            </Link>
-          ))}
-        </div>
-      )}
+            <p className="text-xs text-gray-400 mt-2">
+              By {article.author} • {article.createdAt}
+            </p>
+          </Link>
+        ))}
+      </div>
 
     </main>
   );
