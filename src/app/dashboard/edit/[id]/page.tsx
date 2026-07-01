@@ -19,16 +19,57 @@ export default function EditArticlePage() {
   const [author, setAuthor] = useState("");
   const [coverImage, setCoverImage] = useState("");
 
+  const [dirty, setDirty] = useState(false);
+
   useEffect(() => {
-    if (article) {
-      setTitle(article.title || "");
-      setExcerpt(article.excerpt || "");
-      setContent(article.content || "");
-      setCategory(article.category || "");
-      setAuthor(article.author || "");
-      setCoverImage(article.coverImage || "");
-    }
+    if (!article) return;
+
+    setTitle(article.title || "");
+    setExcerpt(article.excerpt || "");
+    setContent(article.content || "");
+    setCategory(article.category || "");
+    setAuthor(article.author || "");
+    setCoverImage(article.coverImage || "");
   }, [article]);
+
+  // mark changes
+  useEffect(() => {
+    setDirty(true);
+  }, [title, excerpt, content, category, author, coverImage]);
+
+  // AUTO SAVE every 3 seconds
+  useEffect(() => {
+    if (!article) return;
+
+    const interval = setInterval(() => {
+      if (!dirty) return;
+
+      updateArticle(article.id, {
+        title,
+        excerpt,
+        content,
+        category,
+        author,
+        coverImage,
+      });
+
+      setDirty(false);
+    }, 3000);
+
+    return () => clearInterval(interval);
+  }, [dirty, title, excerpt, content, category, author, coverImage]);
+
+  // warning before leaving
+  useEffect(() => {
+    const handler = (e: BeforeUnloadEvent) => {
+      if (!dirty) return;
+      e.preventDefault();
+      e.returnValue = "";
+    };
+
+    window.addEventListener("beforeunload", handler);
+    return () => window.removeEventListener("beforeunload", handler);
+  }, [dirty]);
 
   if (!article) {
     return (
@@ -41,9 +82,15 @@ export default function EditArticlePage() {
   return (
     <main className="max-w-3xl mx-auto px-6 py-12">
 
-      <h1 className="text-3xl font-bold mb-6">
-        Edit Article
-      </h1>
+      <div className="flex items-center justify-between mb-6">
+        <h1 className="text-3xl font-bold">Edit Article</h1>
+
+        {dirty && (
+          <span className="text-sm text-orange-500">
+            Unsaved changes...
+          </span>
+        )}
+      </div>
 
       <div className="space-y-4">
 
@@ -96,72 +143,25 @@ export default function EditArticlePage() {
           />
         )}
 
-        {/* CMS ACTIONS */}
-        <div className="flex flex-wrap gap-3 pt-4">
-
-          {/* SAVE DRAFT */}
-          <button
-            onClick={() => {
-              updateArticle(article.id, {
-                title,
-                excerpt,
-                content,
-                category,
-                author,
-                coverImage,
-              });
-
-              router.push("/dashboard");
-            }}
-            className="px-4 py-2 border rounded"
-          >
-            Save Draft
-          </button>
-
-          {/* SEND FOR REVIEW */}
-          <button
-            onClick={() => {
-              updateArticle(article.id, {
-                status: "pending",
-                title,
-                excerpt,
-                content,
-                category,
-                author,
-                coverImage,
-              });
-
-              router.push("/dashboard");
-            }}
-            className="px-4 py-2 bg-yellow-500 text-white rounded"
-          >
-            Send for Review
-          </button>
-
-          {/* PUBLISH */}
-          <button
-            onClick={() => {
-              updateArticle(article.id, {
-                status: "published",
-                title,
-                excerpt,
-                content,
-                category,
-                author,
-                coverImage,
-              });
-
-              router.push("/dashboard");
-            }}
-            className="px-4 py-2 bg-black text-white rounded"
-          >
-            Publish
-          </button>
-
-        </div>
+        {/* MANUAL SAVE BUTTON (backup) */}
+        <button
+          onClick={() => {
+            updateArticle(article.id, {
+              title,
+              excerpt,
+              content,
+              category,
+              author,
+              coverImage,
+            });
+            setDirty(false);
+          }}
+          className="px-5 py-2 bg-black text-white rounded"
+        >
+          Save Now
+        </button>
 
       </div>
-
     </main>
   );
 }
