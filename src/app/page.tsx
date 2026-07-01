@@ -10,65 +10,53 @@ import ScrollingBanner from "@/src/components/Home/ScrollingBanner";
 import { useArticleStore } from "@/src/store/articleStore";
 
 export default function Home() {
-  const {
-    getPublished,
-    getFeatured,
-    getTrending,
-    getFiltered,
-  } = useArticleStore();
+  const { getPublished, getFeatured, getTrending } =
+    useArticleStore();
 
-  // SAFE DEFAULTS (prevents runtime crashes)
-  const published = getPublished() ?? [];
-  const trending = getTrending() ?? [];
-  const featured = getFeatured() ?? null;
+  const published = getPublished() || [];
+  const featured = getFeatured();
+  const trending = getTrending() || [];
 
-  // 🔍 IMPORTANT: use search-aware filtering
-  const filteredPublished = getFiltered().filter(
-    (a) => a.status === "published"
-  );
-
-  const latest = filteredPublished.filter(
-    (a) => a.id !== featured?.id
-  );
+  const latest = featured
+    ? published.filter((a) => a.id !== featured.id)
+    : published;
 
   return (
     <main className="max-w-6xl mx-auto px-4 sm:px-6 py-8 space-y-10">
 
-      {/* SEARCH */}
       <SearchBar />
 
-      {/* SCROLLING BANNER */}
       <ScrollingBanner />
 
-      {/* HERO */}
-      <HeroSection featured={featured} />
+      <HeroSection featured={featured ?? null} />
 
-      {/* EMPTY STATE */}
       {!featured && (
-        <div className="text-center py-10 text-gray-500">
-          No featured article yet. Mark one as featured in dashboard.
+        <div className="text-center text-gray-500 py-6">
+          No featured article yet.
         </div>
       )}
 
-      {/* MAIN LAYOUT */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-10">
 
-        {/* LATEST */}
         <div className="lg:col-span-2">
-          <LatestSection articles={latest} />
+          {latest.length > 0 ? (
+            <LatestSection articles={latest} />
+          ) : (
+            <p className="text-gray-500">No articles yet.</p>
+          )}
         </div>
 
-        {/* TRENDING */}
         <aside className="space-y-8">
-          <TrendingSection articles={trending} />
+          {trending.length > 0 ? (
+            <TrendingSection articles={trending} />
+          ) : (
+            <p className="text-gray-500">No trending articles.</p>
+          )}
         </aside>
 
       </div>
 
-      {/* CATEGORIES */}
       <CategorySection />
-
-      {/* NEWSLETTER */}
       <NewsletterSection />
 
     </main>
