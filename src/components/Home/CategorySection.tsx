@@ -1,35 +1,48 @@
 "use client";
 
-import { useArticleStore } from "@/src/store/articleStore";
 import Link from "next/link";
+import { useArticleStore } from "@/src/store/articleStore";
 
 export default function CategorySection() {
   const { articles } = useArticleStore();
 
-  const categories = Array.from(
-    new Set(
-      articles
-        .map((a) => a.category)
-        .filter(Boolean)
-    )
-  );
+  const categoriesMap: Record<string, number> = {};
+
+  articles.forEach((article) => {
+    if (!article.category) return;
+
+    const key = article.category.toLowerCase().trim();
+    categoriesMap[key] = (categoriesMap[key] || 0) + 1;
+  });
+
+  const categories = Object.entries(categoriesMap);
+
+  if (!categories.length) return null;
 
   return (
-    <section className="mb-16">
+    <section className="mt-12">
 
-      <h2 className="text-2xl font-semibold mb-6">
-        Browse by Category
+      <h2 className="text-2xl font-bold mb-6">
+        Categories
       </h2>
 
-      <div className="flex flex-wrap gap-3">
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
 
-        {categories.map((cat) => (
+        {categories.map(([category, count]) => (
           <Link
-            key={cat}
-            href={`/category/${cat.toLowerCase()}`}
-            className="px-4 py-2 border rounded-full text-sm hover:bg-black hover:text-white transition"
+            key={category}
+            href={`/category/${encodeURIComponent(category)}`}
+            className="border rounded-xl p-5 hover:shadow-md transition bg-white"
           >
-            {cat}
+
+            <h3 className="text-lg font-semibold capitalize">
+              {category}
+            </h3>
+
+            <p className="text-sm text-gray-500 mt-1">
+              {count} articles
+            </p>
+
           </Link>
         ))}
 
