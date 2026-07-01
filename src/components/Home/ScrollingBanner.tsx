@@ -1,25 +1,26 @@
 "use client";
 
-import { useArticleStore } from "@/src/store/articleStore";
 import Link from "next/link";
+import { useArticleStore } from "@/src/store/articleStore";
 
 export default function ScrollingBanner() {
   const { getTrending } = useArticleStore();
 
-  const trending = getTrending().slice(0, 6);
+  const trending = getTrending().slice(0, 8);
 
-  if (trending.length === 0) return null;
+  if (!trending.length) return null;
 
   return (
-    <div className="w-full bg-black text-white overflow-hidden py-2">
+    <div className="w-full overflow-hidden border-y bg-black text-white">
+      
+      <div className="flex whitespace-nowrap animate-scroll py-2">
 
-      <div className="whitespace-nowrap animate-marquee flex gap-10 px-4">
-
-        {trending.map((article) => (
+        {/* duplicate twice for smooth infinite loop */}
+        {[...trending, ...trending].map((article, i) => (
           <Link
-            key={article.id}
+            key={i}
             href={`/articles/${article.slug}`}
-            className="text-sm hover:underline"
+            className="mx-6 text-sm hover:underline"
           >
             🔥 {article.title}
           </Link>
@@ -29,17 +30,18 @@ export default function ScrollingBanner() {
 
       {/* animation */}
       <style jsx>{`
-        .animate-marquee {
+        .animate-scroll {
           display: inline-flex;
+          min-width: 100%;
           animation: scroll 20s linear infinite;
         }
 
         @keyframes scroll {
           0% {
-            transform: translateX(100%);
+            transform: translateX(0%);
           }
           100% {
-            transform: translateX(-100%);
+            transform: translateX(-50%);
           }
         }
       `}</style>
