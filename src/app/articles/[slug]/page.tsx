@@ -73,7 +73,7 @@ export default function ArticlePage() {
         <span>{readingTime} min read</span>
       </div>
 
-      {/* IMAGE (FIXED) */}
+      {/* IMAGE */}
       {article.coverImage && (
         <img
           src={article.coverImage}
@@ -96,13 +96,9 @@ export default function ArticlePage() {
       {/* RELATED */}
       {related.length > 0 && (
         <section className="mt-12 border-t pt-8">
-
-          <h2 className="text-xl font-bold mb-4">
-            Related Articles
-          </h2>
+          <h2 className="text-xl font-bold mb-4">Related Articles</h2>
 
           <div className="grid gap-4">
-
             {related.map((item) => (
               <Link
                 key={item.id}
@@ -113,11 +109,9 @@ export default function ArticlePage() {
                 <p className="text-sm text-gray-500">{item.excerpt}</p>
               </Link>
             ))}
-
           </div>
         </section>
       )}
-
     </main>
   );
 }
