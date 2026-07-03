@@ -28,6 +28,7 @@ export default function NewArticlePage() {
       id: crypto.randomUUID(),
       title,
       excerpt,
+      summary: excerpt,
       content,
       category,
       author,
