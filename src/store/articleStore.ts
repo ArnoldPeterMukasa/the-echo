@@ -2,7 +2,27 @@
 
 import { create } from "zustand";
 
-type Article = any;
+type Article = {
+  id: string;
+  title: string;
+  summary: string; // ✅ consistent (replaces excerpt)
+  content: string;
+  category: string;
+  author: string;
+  coverImage?: string;
+
+  slug: string;
+  createdAt: string;
+
+  status: "draft" | "pending" | "published";
+
+  role?: "writer" | "admin";
+
+  featured?: boolean;
+  trending?: boolean;
+
+  views?: number;
+};
 
 type Store = {
   articles: Article[];
@@ -37,7 +57,6 @@ export const useArticleStore = create<Store>((set, get) => ({
   hydrated: false,
 
   searchQuery: "",
-
   setSearchQuery: (q) => set({ searchQuery: q }),
 
   load: () => {
@@ -83,10 +102,7 @@ export const useArticleStore = create<Store>((set, get) => ({
   },
 
   getTotalViews: () =>
-    get().articles.reduce(
-      (sum, a) => sum + (a.views || 0),
-      0
-    ),
+    get().articles.reduce((sum, a) => sum + (a.views || 0), 0),
 
   getTopArticle: () => {
     const published = get().articles.filter(
@@ -148,7 +164,7 @@ export const useArticleStore = create<Store>((set, get) => ({
 
     return get().articles.filter((a) =>
       a.title?.toLowerCase().includes(q) ||
-      a.excerpt?.toLowerCase().includes(q) ||
+      a.summary?.toLowerCase().includes(q) || // ✅ FIXED (was excerpt)
       a.category?.toLowerCase().includes(q) ||
       a.author?.toLowerCase().includes(q)
     );
