@@ -6,112 +6,250 @@ import Link from "next/link";
 import { useArticleStore } from "@/src/store/articleStore";
 
 export default function ArticlePage() {
+
   const { slug } = useParams();
-  const { articles, incrementViews } = useArticleStore();
 
-  const article = articles.find((a) => a.slug === slug);
+  const {
+    articles,
+    hydrate,
+    incrementViews,
+  } = useArticleStore();
 
+
+
+  // Load articles from storage
   useEffect(() => {
+    hydrate();
+  }, [hydrate]);
+
+
+
+  const article = articles.find(
+    (a) => a.slug === slug
+  );
+
+
+
+  // count views once
+  useEffect(() => {
+
     if (article?.id) {
-      incrementViews(article.id);
+
+      const viewed =
+        sessionStorage.getItem(
+          `viewed-${article.id}`
+        );
+
+
+      if (!viewed) {
+
+        incrementViews(article.id);
+
+        sessionStorage.setItem(
+          `viewed-${article.id}`,
+          "true"
+        );
+
+      }
+
     }
+
   }, [article?.id]);
 
+
+
   if (!article) {
+
     return (
+
       <main className="max-w-3xl mx-auto px-6 py-16 text-center">
-        <h1 className="text-2xl font-bold">Article not found</h1>
+
+        <h1 className="text-2xl font-bold">
+          Article not found
+        </h1>
+
         <p className="text-gray-500 mt-2">
           This article may have been deleted or moved.
         </p>
+
       </main>
+
     );
+
   }
 
-  const words = article.content?.split(" ").length || 0;
-  const readingTime = Math.max(1, Math.ceil(words / 200));
+
+
+  const words =
+    article.content?.split(" ").length || 0;
+
+
+  const readingTime =
+    Math.max(1, Math.ceil(words / 200));
+
+
 
   const related = articles
     .filter(
       (a) =>
         a.status === "published" &&
         a.id !== article.id &&
-        a.category?.toLowerCase() === article.category?.toLowerCase()
+        a.category?.toLowerCase() ===
+        article.category?.toLowerCase()
     )
-    .slice(0, 4);
+    .slice(0,4);
+
+
 
   return (
-    <main className="max-w-3xl mx-auto px-4 sm:px-6 py-10 sm:py-14">
 
-      {/* CATEGORY */}
-      <p className="text-xs sm:text-sm uppercase text-gray-500">
+    <main className="max-w-3xl mx-auto px-4 sm:px-6 py-10">
+
+
+      <p className="text-sm uppercase text-gray-500">
         {article.category}
       </p>
 
-      {/* TITLE */}
-      <h1 className="text-2xl sm:text-4xl lg:text-5xl font-bold mt-3 leading-tight">
+
+
+      <h1 className="text-3xl sm:text-5xl font-bold mt-3">
         {article.title}
       </h1>
 
-      {/* META */}
-      <div className="text-xs sm:text-sm text-gray-500 mt-3 flex flex-wrap gap-2">
+
+
+
+      <div className="text-sm text-gray-500 mt-4 flex flex-wrap gap-2">
+
+
         <span>
+
           By{" "}
+
           <Link
             href={`/author/${encodeURIComponent(article.author)}`}
             className="underline hover:text-black"
           >
             {article.author}
           </Link>
+
         </span>
 
+
         <span>•</span>
-        <span>{article.createdAt}</span>
+
+        <span>
+          {article.createdAt}
+        </span>
+
+
         <span>•</span>
-        <span>{article.views || 0} views</span>
+
+        <span>
+          {article.views || 0} views
+        </span>
+
+
         <span>•</span>
-        <span>{readingTime} min read</span>
+
+        <span>
+          {readingTime} min read
+        </span>
+
+
       </div>
 
-      {/* IMAGE */}
+
+
+
       {article.coverImage && (
+
         <img
           src={article.coverImage}
-          loading="lazy"
           alt={article.title}
-          className="w-full mt-6 sm:mt-8 rounded-xl max-h-[420px] object-cover"
+          loading="lazy"
+          className="w-full mt-8 rounded-xl max-h-[450px] object-cover"
         />
+
       )}
 
-      {/* EXCERPT */}
-      <p className="mt-6 sm:mt-8 text-base sm:text-lg text-gray-700 leading-relaxed">
-        {article.excerpt}
+
+
+
+
+
+      <p className="mt-8 text-lg text-gray-700 leading-relaxed">
+
+        {article.summary}
+
       </p>
 
-      {/* CONTENT */}
-      <div className="mt-6 sm:mt-8 text-base sm:text-lg leading-8 whitespace-pre-line text-gray-800">
+
+
+
+      <div className="mt-8 text-lg leading-8 whitespace-pre-line">
+
         {article.content}
+
       </div>
 
-      {/* RELATED */}
+
+
+
+
+
       {related.length > 0 && (
+
         <section className="mt-12 border-t pt-8">
-          <h2 className="text-xl font-bold mb-4">Related Articles</h2>
+
+
+          <h2 className="text-xl font-bold mb-5">
+            Related Articles
+          </h2>
+
+
 
           <div className="grid gap-4">
+
+
             {related.map((item) => (
+
               <Link
+
                 key={item.id}
+
                 href={`/articles/${item.slug}`}
-                className="border rounded-lg p-4 hover:shadow transition"
+
+                className="border rounded-lg p-4 hover:shadow"
+
               >
-                <h3 className="font-semibold">{item.title}</h3>
-                <p className="text-sm text-gray-500">{item.excerpt}</p>
+
+                <h3 className="font-semibold">
+                  {item.title}
+                </h3>
+
+
+                <p className="text-sm text-gray-500">
+                  {item.summary}
+                </p>
+
+
               </Link>
+
             ))}
+
+
           </div>
+
+
         </section>
+
       )}
+
+
+
     </main>
+
   );
+
 }
