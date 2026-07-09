@@ -3,60 +3,81 @@
 import Link from "next/link";
 
 type Props = {
-  featured: any | null;
+  featured: any;
 };
 
 export default function HeroSection({ featured }: Props) {
+
   if (!featured) {
-    return (
-      <div className="w-full h-[300px] flex items-center justify-center bg-gray-100 rounded-xl">
-        <p className="text-gray-500">No featured article yet</p>
-      </div>
-    );
+    return null;
   }
 
-  return (
-    <section className="relative w-full h-[500px] rounded-xl overflow-hidden">
 
-      {/* IMAGE */}
+  return (
+    <section className="relative overflow-hidden rounded-3xl bg-black text-white">
+
+
+      {/* COVER IMAGE */}
       {featured.coverImage && (
         <img
           src={featured.coverImage}
           alt={featured.title}
-          className="absolute inset-0 w-full h-full object-cover"
+          className="absolute inset-0 w-full h-full object-cover opacity-60"
         />
       )}
 
-      {/* DARK OVERLAY */}
-      <div className="absolute inset-0 bg-black/50" />
+
+
+      {/* COLOR OVERLAY */}
+      <div className="absolute inset-0 bg-gradient-to-r from-black via-black/70 to-transparent" />
+
+
 
       {/* CONTENT */}
-      <div className="relative z-10 h-full flex flex-col justify-end p-6 sm:p-10 text-white">
+      <div className="relative z-10 px-6 py-16 sm:px-10 sm:py-24 max-w-3xl">
 
-        {/* CATEGORY */}
-        <span className="text-xs uppercase bg-white/20 px-3 py-1 rounded-full w-fit mb-3">
-          {featured.category}
-        </span>
 
-        {/* TITLE */}
-        <h1 className="text-2xl sm:text-4xl font-bold leading-tight max-w-2xl">
+        <p className="uppercase text-sm tracking-widest text-yellow-400 mb-4">
+          Featured Story
+        </p>
+
+
+
+        <h1 className="text-4xl sm:text-6xl font-extrabold leading-tight">
           {featured.title}
         </h1>
 
-        {/* EXCERPT */}
-        <p className="text-sm sm:text-base text-gray-200 mt-3 max-w-xl">
-          {featured.excerpt}
+
+
+        <p className="mt-5 text-lg text-gray-200 max-w-xl">
+          {featured.summary}
         </p>
 
-        {/* CTA */}
-        <Link
-          href={`/articles/${featured.slug}`}
-          className="mt-5 inline-block bg-white text-black px-5 py-2 rounded-lg font-medium w-fit"
-        >
-          Read Article →
-        </Link>
+
+
+        <div className="mt-8 flex gap-4">
+
+
+          <Link
+            href={`/articles/${featured.slug}`}
+            className="px-6 py-3 bg-yellow-400 text-black rounded-full font-semibold hover:bg-yellow-300"
+          >
+            Read Story
+          </Link>
+
+
+          <span className="px-6 py-3 border border-white rounded-full">
+            {featured.category}
+          </span>
+
+
+        </div>
+
+
 
       </div>
+
+
     </section>
   );
 }

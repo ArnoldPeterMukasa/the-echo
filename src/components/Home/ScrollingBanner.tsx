@@ -1,50 +1,47 @@
 "use client";
 
-import Link from "next/link";
-import { useArticleStore } from "@/src/store/articleStore";
-
 export default function ScrollingBanner() {
-  const { getTrending } = useArticleStore();
 
-  const trending = getTrending().slice(0, 8);
+  const news = [
+    "THE ECHO Magazine launches new issue",
+    "Breaking: New featured stories available",
+    "Read exclusive interviews from our writers",
+    "Submit your article for review today",
+    "Discover trending stories"
+  ];
 
-  if (!trending.length) return null;
 
   return (
-    <div className="w-full overflow-hidden border-y bg-black text-white">
-      
-      <div className="flex whitespace-nowrap animate-scroll py-2">
+    <div className="flex overflow-hidden border rounded-xl bg-black text-white">
 
-        {/* duplicate twice for smooth infinite loop */}
-        {[...trending, ...trending].map((article, i) => (
-          <Link
-            key={i}
-            href={`/articles/${article.slug}`}
-            className="mx-6 text-sm hover:underline"
-          >
-            🔥 {article.title}
-          </Link>
-        ))}
+
+      {/* STATIC BRAND BOX */}
+
+      <div className="bg-yellow-400 text-black px-5 py-3 font-bold whitespace-nowrap z-10">
+        THE ECHO
+      </div>
+
+
+
+      {/* MOVING CONTENT */}
+
+      <div className="relative overflow-hidden flex-1">
+
+        <div className="animate-scroll whitespace-nowrap py-3">
+
+          {news.map((item,index)=>(
+            <span
+              key={index}
+              className="mx-8"
+            >
+              {item}
+            </span>
+          ))}
+
+        </div>
 
       </div>
 
-      {/* animation */}
-      <style jsx>{`
-        .animate-scroll {
-          display: inline-flex;
-          min-width: 100%;
-          animation: scroll 20s linear infinite;
-        }
-
-        @keyframes scroll {
-          0% {
-            transform: translateX(0%);
-          }
-          100% {
-            transform: translateX(-50%);
-          }
-        }
-      `}</style>
 
     </div>
   );

@@ -4,11 +4,12 @@ import { useArticleStore } from "@/src/store/articleStore";
 import Link from "next/link";
 
 export default function PendingQueue() {
-  const { articles, updateArticle, deleteArticle } = useArticleStore();
+  const { articles, updateArticle } = useArticleStore();
 
   const pending = articles.filter(
     (a) => a.status === "pending"
   );
+
 
   if (pending.length === 0) {
     return (
@@ -18,10 +19,12 @@ export default function PendingQueue() {
     );
   }
 
+
   return (
     <div className="space-y-4">
 
       {pending.map((article) => (
+
         <div
           key={article.id}
           className="border rounded-xl p-4 flex flex-col gap-3"
@@ -31,9 +34,11 @@ export default function PendingQueue() {
           <div className="flex justify-between items-start gap-4">
 
             <div>
+
               <h2 className="font-bold text-lg">
                 {article.title}
               </h2>
+
 
               <p className="text-sm text-gray-500">
                 By{" "}
@@ -45,45 +50,64 @@ export default function PendingQueue() {
                 </Link>
               </p>
 
+
               <p className="text-xs text-gray-400">
                 {article.category} • {article.createdAt}
               </p>
+
             </div>
+
 
             {article.coverImage && (
               <img
                 src={article.coverImage}
+                alt={article.title}
+                loading="lazy"
                 className="w-24 h-16 object-cover rounded"
               />
             )}
 
           </div>
 
-          {/* EXCERPT */}
+
+
+          {/* SUMMARY */}
           <p className="text-sm text-gray-700 line-clamp-2">
             {article.summary || article.content?.slice(0, 120)}
           </p>
 
+
+
           {/* ACTIONS */}
           <div className="flex gap-3">
+
 
             <button
               onClick={() =>
                 updateArticle(article.id, {
                   status: "published",
+                  role: "admin",
                 })
               }
               className="px-3 py-1 bg-green-600 text-white rounded"
             >
-              Approve
+              Approve & Publish
             </button>
 
+
+
             <button
-              onClick={() => deleteArticle(article.id)}
+              onClick={() =>
+                updateArticle(article.id, {
+                  status: "draft",
+                })
+              }
               className="px-3 py-1 bg-red-600 text-white rounded"
             >
-              Reject
+              Reject/send back
             </button>
+
+
 
             <Link
               href={`/articles/${article.slug}`}
@@ -92,9 +116,12 @@ export default function PendingQueue() {
               Preview
             </Link>
 
+
           </div>
 
+
         </div>
+
       ))}
 
     </div>

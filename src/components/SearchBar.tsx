@@ -3,17 +3,33 @@
 import { useArticleStore } from "@/src/store/articleStore";
 
 export default function SearchBar() {
-  const { searchQuery, setSearchQuery } = useArticleStore();
+
+  const {
+    searchQuery,
+    setSearchQuery,
+  } = useArticleStore();
+
 
   return (
-    <div className="w-full mb-6">
+    <div className="w-full">
 
       <input
         type="text"
         value={searchQuery}
-        onChange={(e) => setSearchQuery(e.target.value)}
+        onChange={(e) =>
+          setSearchQuery(e.target.value)
+        }
         placeholder="Search articles, categories, authors..."
-        className="w-full border rounded-lg px-4 py-3 outline-none focus:ring-2 focus:ring-black"
+        className="
+          w-full
+          px-5
+          py-3
+          border
+          rounded-xl
+          outline-none
+          focus:ring-2
+          focus:ring-black
+        "
       />
 
     </div>
