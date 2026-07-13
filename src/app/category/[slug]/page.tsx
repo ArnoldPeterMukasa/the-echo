@@ -18,46 +18,94 @@ export default function CategoryPage() {
 
   if (!filtered.length) {
     return (
-      <main className="max-w-3xl mx-auto px-6 py-16 text-center">
-        <h1 className="text-2xl font-bold">No articles found</h1>
-        <p className="text-gray-500 mt-2">
-          No content in this category yet.
+      <main className="max-w-5xl mx-auto px-6 py-20 text-center">
+        <h1 className="text-4xl font-black">
+          {decodedCategory}
+        </h1>
+
+        <p className="text-gray-500 mt-4">
+          No published articles in this category yet.
         </p>
       </main>
     );
   }
 
   return (
-    <main className="max-w-5xl mx-auto px-6 py-10">
+    <main className="max-w-6xl mx-auto px-6 py-10">
 
-      <h1 className="text-3xl font-bold mb-2 capitalize">
-        {decodedCategory}
-      </h1>
+      {/* HEADER */}
+      <section className="border-b pb-8 mb-10">
 
-      <p className="text-gray-500 mb-8">
-        {filtered.length} article(s)
-      </p>
+        <p className="uppercase tracking-[0.35em] text-yellow-500 text-sm font-semibold">
+          Category
+        </p>
 
-      <div className="grid gap-5">
+        <h1 className="text-5xl font-black mt-3 capitalize">
+          {decodedCategory}
+        </h1>
+
+        <p className="mt-3 text-gray-500">
+          {filtered.length} Published Article
+          {filtered.length > 1 && "s"}
+        </p>
+
+      </section>
+
+
+      {/* ARTICLES */}
+
+      <div className="grid md:grid-cols-2 gap-8">
+
         {filtered.map((article) => (
+
           <Link
             key={article.id}
             href={`/articles/${article.slug}`}
-            className="border rounded-xl p-5 hover:shadow transition"
+            className="group border rounded-2xl overflow-hidden hover:shadow-xl transition"
           >
-            <h2 className="text-xl font-semibold">
-              {article.title}
-            </h2>
 
-            <p className="text-sm text-gray-500 mt-1">
-              {article.summary}
-            </p>
+            {article.coverImage && (
 
-            <p className="text-xs text-gray-400 mt-2">
-              By {article.author} • {article.createdAt}
-            </p>
+              <img
+                src={article.coverImage}
+                alt={article.title}
+                className="w-full h-56 object-cover group-hover:scale-105 transition duration-300"
+              />
+
+            )}
+
+            <div className="p-6">
+
+              <p className="uppercase text-xs text-yellow-600 font-semibold">
+                {article.category}
+              </p>
+
+              <h2 className="text-2xl font-bold mt-2 group-hover:text-yellow-600 transition">
+                {article.title}
+              </h2>
+
+              <p className="mt-3 text-gray-600 line-clamp-3">
+                {article.summary}
+              </p>
+
+              <div className="mt-6 flex justify-between text-sm text-gray-500">
+
+                <span>
+                  {article.author}
+                </span>
+
+                <span>
+                  {article.createdAt}
+                </span>
+
+              </div>
+
+            </div>
+
           </Link>
+
         ))}
+
       </div>
 
     </main>
