@@ -23,7 +23,7 @@ export default function FeaturedSection({ featured }: Props) {
       </Link>
 
       <p className="text-gray-600 mt-4 text-lg max-w-2xl">
-        {featured.excerpt}
+        {featured.summary}
       </p>
 
       <p className="text-sm text-gray-400 mt-2">
