@@ -26,45 +26,15 @@ body {
 }
 
 @keyframes scroll {
-  from {
+  0% {
     transform: translateX(100%);
   }
 
-  to {
-    transform: translateX(-100%);
-  }
-}
-
-
-.animate-scroll {
-  animation: scroll 25s linear infinite;
-}
-
-@keyframes scroll {
-  from {
-    transform: translateX(100%);
-  }
-
-  to {
+  100% {
     transform: translateX(-100%);
   }
 }
 
 .animate-scroll {
-  animation: scroll 25s linear infinite;
-}
-
-@keyframes scroll {
-  from {
-    transform: translateX(100%);
-  }
-
-  to {
-    transform: translateX(-100%);
-  }
-}
-
-
-.animate-scroll {
-  animation: scroll 25s linear infinite;
+  animation: scroll 30s linear infinite;
 }
