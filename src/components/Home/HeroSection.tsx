@@ -64,7 +64,7 @@ export default function HeroSection({ featured }: Props) {
 
           <Link
             href={`/articles/${featured.slug}`}
-            className="bg-yellow-400 text-black px-8 py-3rounded-full font-bold hover:bg-yellow-300 transition"
+            className="bg-yellow-400 text-black px-8 py-3 rounded-full font-bold hover:bg-yellow-300 transition"
           >
             Read Story → 
           </Link>
@@ -77,7 +77,7 @@ export default function HeroSection({ featured }: Props) {
 
         </div>
 
-        <div className="mt-10 flex flex-wrap gap-6 text-sm text-sm text-gray-300">
+        <div className="mt-10 flex flex-wrap gap-6 text-sm text-gray-300">
           <span>
             By <strong>{featured.author}</strong>
           </span>
