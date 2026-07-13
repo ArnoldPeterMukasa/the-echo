@@ -2,7 +2,7 @@
 
 export default function ScrollingBanner() {
 
-  const news = [
+  const headlines = [
     "THE ECHO Magazine launches new issue",
     "Breaking: New featured stories available",
     "Read exclusive interviews from our writers",
@@ -12,37 +12,33 @@ export default function ScrollingBanner() {
 
 
   return (
-    <div className="flex overflow-hidden border rounded-xl bg-black text-white">
-
-
+    <section className= "w-full overflow-hidden rounded-xl border bg-black text-white flex">
       {/* STATIC BRAND BOX */}
 
-      <div className="bg-yellow-400 text-black px-5 py-3 font-bold whitespace-nowrap z-10">
+      <div className="bg-yellow-400 text-black px-5 py-3 font-extrabold tracking-wide flex items-center z-10">
         THE ECHO
       </div>
 
+      {/*Moving Headlines*/}
 
+      <div className="overflow-hidden flex-1 relative">
 
-      {/* MOVING CONTENT */}
+        <div className="flex whitespace-nowrap animate-scroll py-3">
 
-      <div className="relative overflow-hidden flex-1">
-
-        <div className="animate-scroll whitespace-nowrap py-3">
-
-          {news.map((item,index)=>(
+          {headlines.map((headline, index)=>(
             <span
               key={index}
-              className="mx-8"
+              className="mx-8 text-sm sm:text-base"
             >
-              {item}
+              {headline}
             </span>
           ))}
 
         </div>
-
+        
       </div>
-
-
-    </div>
+    </section>
+    
+           
   );
 }
