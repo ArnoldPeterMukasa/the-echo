@@ -4,10 +4,15 @@ import { useArticleStore } from "@/src/store/articleStore";
 import Link from "next/link";
 
 export default function PendingQueue() {
-  const { articles, updateArticle } = useArticleStore();
+
+  const {
+    articles,
+    updateArticle,
+  } = useArticleStore();
+
 
   const pending = articles.filter(
-    (a) => a.status === "pending"
+    (article) => article.status === "pending"
   );
 
 
@@ -21,97 +26,121 @@ export default function PendingQueue() {
 
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-6">
 
-      {pending.map((article) => (
+
+      {pending.map((article)=>(
 
         <div
           key={article.id}
-          className="border rounded-xl p-4 flex flex-col gap-3"
+          className="
+            border
+            rounded-2xl
+            p-6
+            bg-white
+            shadow-sm
+          "
         >
 
-          {/* TOP INFO */}
-          <div className="flex justify-between items-start gap-4">
 
-            <div>
+          {article.coverImage && (
 
-              <h2 className="font-bold text-lg">
-                {article.title}
-              </h2>
+            <img
+              src={article.coverImage}
+              alt={article.title}
+              className="
+                w-full
+                h-60
+                object-cover
+                rounded-xl
+                mb-5
+              "
+            />
 
-
-              <p className="text-sm text-gray-500">
-                By{" "}
-                <Link
-                  href={`/author/${encodeURIComponent(article.author)}`}
-                  className="underline hover:text-black"
-                >
-                  {article.author}
-                </Link>
-              </p>
-
-
-              <p className="text-xs text-gray-400">
-                {article.category} • {article.createdAt}
-              </p>
-
-            </div>
-
-
-            {article.coverImage && (
-              <img
-                src={article.coverImage}
-                alt={article.title}
-                loading="lazy"
-                className="w-24 h-16 object-cover rounded"
-              />
-            )}
-
-          </div>
+          )}
 
 
 
-          {/* SUMMARY */}
-          <p className="text-sm text-gray-700 line-clamp-2">
-            {article.summary || article.content?.slice(0, 120)}
+          <p className="text-xs uppercase text-gray-500">
+            {article.category}
           </p>
 
 
 
-          {/* ACTIONS */}
-          <div className="flex gap-3">
+          <h2 className="text-2xl font-bold mt-2">
+            {article.title}
+          </h2>
+
+
+
+          <p className="text-sm text-gray-500 mt-2">
+            By {article.author} • {article.createdAt}
+          </p>
+
+
+
+          <p className="mt-4 text-gray-700">
+            {article.summary}
+          </p>
+
+
+
+          <p className="mt-4 text-gray-600 line-clamp-4">
+            {article.content}
+          </p>
+
+
+
+          <div className="flex flex-wrap gap-3 mt-6">
 
 
             <button
               onClick={() =>
-                updateArticle(article.id, {
-                  status: "published",
-                  role: "admin",
+                updateArticle(article.id,{
+                  status:"published",
+                  role:"admin"
                 })
               }
-              className="px-3 py-1 bg-green-600 text-white rounded"
+              className="
+                px-4
+                py-2
+                bg-green-600
+                text-white
+                rounded-lg
+              "
             >
-              Approve & Publish
+              Publish
             </button>
 
 
 
             <button
               onClick={() =>
-                updateArticle(article.id, {
-                  status: "draft",
+                updateArticle(article.id,{
+                  status:"draft"
                 })
               }
-              className="px-3 py-1 bg-red-600 text-white rounded"
+              className="
+                px-4
+                py-2
+                bg-red-600
+                text-white
+                rounded-lg
+              "
             >
-              Reject/send back
+              Send Back
             </button>
 
 
 
             <Link
               href={`/articles/${article.slug}`}
-              className="px-3 py-1 border rounded"
+              className="
+                px-4
+                py-2
+                border
+                rounded-lg
+              "
             >
               Preview
             </Link>
@@ -122,7 +151,9 @@ export default function PendingQueue() {
 
         </div>
 
+
       ))}
+
 
     </div>
   );
