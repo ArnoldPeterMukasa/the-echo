@@ -14,7 +14,7 @@ export default function EditArticlePage() {
   const article = articles.find((a) => a.id === id);
 
   const [title, setTitle] = useState("");
-  const [excerpt, setExcerpt] = useState("");
+  const [summary, setSummary] = useState("");
   const [content, setContent] = useState("");
   const [category, setCategory] = useState("");
   const [author, setAuthor] = useState("");
@@ -26,7 +26,7 @@ export default function EditArticlePage() {
     if (!article) return;
 
     setTitle(article.title || "");
-    setExcerpt(article.excerpt || "");
+    setSummary(article.summary || "");
     setContent(article.content || "");
     setCategory(article.category || "");
     setAuthor(article.author || "");
@@ -44,7 +44,7 @@ export default function EditArticlePage() {
   const handleUpdate = () => {
     updateArticle(article.id, {
       title,
-      excerpt,
+      summary,
       content,
       category,
       author,
@@ -72,9 +72,9 @@ export default function EditArticlePage() {
 
         <input
           className="w-full border p-3 rounded"
-          value={excerpt}
-          onChange={(e) => setExcerpt(e.target.value)}
-          placeholder="Excerpt"
+          value={summary}
+          onChange={(e) => setSummary(e.target.value)}
+          placeholder="Summary"
         />
 
         <textarea
