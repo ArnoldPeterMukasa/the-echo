@@ -6,7 +6,7 @@ export default function Header() {
       <div className="max-w-6xl mx-auto px-6 h-16 flex items-center justify-between">
 
         {/* Logo */}
-        <Link href="/">
+        <Link href="/cover">
           <div>
             <h1 className="text-2xl font-bold">
               The Echo
@@ -22,15 +22,16 @@ export default function Header() {
         <nav className="flex gap-8 text-sm font-medium">
 
           <Link
-            href="/"
-            className="hover:text-gray-500 transition"
-          >
-            Home
+            href="/dashboard" className="hover:text-gray-500 transition">
+            Dashboard
           </Link>
 
           <Link
-          href="/dashboard" className="hover:text-gray-500 transition">
-            Dashboard
+            href="/cover"
+            className="hover:text-gray-500 transition"
+          >
+            Home
+
           </Link>
 
           <Link
