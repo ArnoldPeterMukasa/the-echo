@@ -14,36 +14,40 @@ export default function HeroSection({ featured }: Props) {
 
 
   return (
-    <section className="relative overflow-hidden rounded-3xl bg-black text-white">
+    <section className="relative overflow-hidden rounded-3xl h-[650px]">
 
 
-      {/* COVER IMAGE */}
+      {/* COVER/background IMAGE */}
       {featured.coverImage && (
         <img
           src={featured.coverImage}
           alt={featured.title}
-          className="absolute inset-0 w-full h-full object-cover opacity-60"
+          className="absolute inset-0 w-full h-full object-cover"
         />
       )}
 
 
 
-      {/* COLOR OVERLAY */}
-      <div className="absolute inset-0 bg-gradient-to-r from-black via-black/70 to-transparent" />
+      {/* DARK OVERLAY */}
+      <div className="absolute inset-0 bg-gradient-to-r from-black via-black/70 to-black/20" />
 
 
 
-      {/* CONTENT */}
-      <div className="relative z-10 px-6 py-16 sm:px-10 sm:py-24 max-w-3xl">
+      {/* MAGAZINECONTENT */}
+      <div className="relative z-10 flex flex-col justify-end h-full px-8 sm:px-14 py-14">
 
 
-        <p className="uppercase text-sm tracking-widest text-yellow-400 mb-4">
-          Featured Story
+        <p className="uppercase tracking-[0.4em] text-yellow-400 text-sm font-semibold">
+          THE ECHO MAGAZINE
         </p>
 
 
+        <p className="mt-2 text-gray-300 uppercase text-sm">
+          Issue 01 • Featured Story
+        </p>
 
-        <h1 className="text-4xl sm:text-6xl font-extrabold leading-tight">
+
+        <h1 className="mt-5 max-w-4xl sm:text-6xl lg:text-7xl font-extrabold leading-tight text-white">
           {featured.title}
         </h1>
 
@@ -60,20 +64,33 @@ export default function HeroSection({ featured }: Props) {
 
           <Link
             href={`/articles/${featured.slug}`}
-            className="px-6 py-3 bg-yellow-400 text-black rounded-full font-semibold hover:bg-yellow-300"
+            className="bg-yellow-400 text-black px-8 py-3rounded-full font-bold hover:bg-yellow-300 transition"
           >
-            Read Story
+            Read Story → 
           </Link>
 
 
-          <span className="px-6 py-3 border border-white rounded-full">
+          <span className="border border-white/60 text-white px-6 py-3 rounded-full">
             {featured.category}
           </span>
 
 
         </div>
 
+        <div className="mt-10 flex flex-wrap gap-6 text-sm text-sm text-gray-300">
+          <span>
+            By <strong>{featured.author}</strong>
+          </span>
 
+          <span>
+            {featured.views || 0} Views
+          </span>
+
+          <span>
+            {featured.createdAt}
+          </span>
+
+        </div>
 
       </div>
 
