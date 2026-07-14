@@ -1,5 +1,5 @@
-import CoverPage from "@/src/components/CoverPage";
+import { redirect } from "next/navigation";
 
-export default function Home() {
-  return <CoverPage />;
+export default function Page() {
+  redirect("/cover");
 }
