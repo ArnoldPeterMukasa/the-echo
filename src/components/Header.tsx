@@ -7,7 +7,6 @@ export default function Header() {
       <div className="max-w-6xl mx-auto px-6 h-16 flex items-center justify-between">
 
 
-        {/* Logo */}
         <Link href="/home">
 
           <div>
@@ -26,50 +25,30 @@ export default function Header() {
 
 
 
-        {/* Navigation */}
         <nav className="flex gap-8 text-sm font-medium">
 
 
-          <Link
-            href="/home"
-            className="hover:text-gray-500 transition"
-          >
+          <Link href="/home">
             Home
           </Link>
 
 
-
-          <Link
-            href="/articles"
-            className="hover:text-gray-500 transition"
-          >
+          <Link href="/articles">
             Articles
           </Link>
 
 
-
-          <Link
-            href="/dashboard"
-            className="hover:text-gray-500 transition"
-          >
+          <Link href="/dashboard">
             Dashboard
           </Link>
 
 
-
-          <Link
-            href="/about"
-            className="hover:text-gray-500 transition"
-          >
+          <Link href="/about">
             About
           </Link>
 
 
-
-          <Link
-            href="/contact"
-            className="hover:text-gray-500 transition"
-          >
+          <Link href="/contact">
             Contact
           </Link>
 
