@@ -1,256 +1,161 @@
+//WRITER DASHBOARD PAGE
 "use client";
 
-
-import HeroSection from "@/src/components/Home/HeroSection";
-
-import LatestSection from "@/src/components/Home/LatestSection";
-
-import TrendingSection from "@/src/components/Home/TrendingSection";
-
-import CategorySection from "@/src/components/Home/CategorySection";
-
-import NewsletterSection from "@/src/components/Home/NewsletterSection";
-
-import SearchBar from "@/src/components/SearchBar";
-
-import ScrollingBanner from "@/src/components/Home/ScrollingBanner";
-
+import { useEffect, useState } from "react";
+import Link from "next/link";
 import { useArticleStore } from "@/src/store/articleStore";
+import Analytics from "@/src/components/dashboard/Analytics";
 
+type Filter = "all" | "published" | "pending" | "draft";
 
-
-export default function Home() {
-
-
+export default function DashboardPage() {
 
   const {
-
-    getFiltered,
-
-    getFeatured,
-
-    getTrending,
-
+    articles,
+    hydrate,
+    updateArticle,
+    deleteArticle,
   } = useArticleStore();
 
 
+  const [mounted, setMounted] = useState(false);
+
+  const [filter, setFilter] = useState<Filter>("all");
 
 
 
-  // SEARCHED + ONLY PUBLIC ARTICLES
+  useEffect(() => {
 
-  const published = getFiltered().filter(
+    hydrate();
 
-    (article) =>
+    setMounted(true);
 
-      article.status === "published"
-
-  );
+  }, [hydrate]);
 
 
 
+  if (!mounted) {
 
+    return (
 
-  const featured = getFeatured();
+      <main className="p-10 text-center text-gray-500">
 
+        Loading dashboard...
 
+      </main>
 
+    );
 
-
-  const trending = getTrending()
-
-    .filter(
-
-      (article) => article.status === "published"
-
-    )
-
-    .slice(0,5);
+  }
 
 
 
+  const filteredArticles = articles.filter((article)=>{
+
+    if(filter==="all") return true;
+
+    return article.status === filter;
+
+  });
 
 
 
+  const count = {
 
-  const latest = featured
+    all: articles.length,
 
-    ? published.filter(
+    published:
+      articles.filter(
+        (a)=>a.status==="published"
+      ).length,
 
-        (article) =>
+    pending:
+      articles.filter(
+        (a)=>a.status==="pending"
+      ).length,
 
-          article.id !== featured.id
+    draft:
+      articles.filter(
+        (a)=>a.status==="draft"
+      ).length,
 
-      )
-
-    : published;
-
-
-
-
+  };
 
 
 
   return (
 
+    <main className="max-w-7xl mx-auto px-6 py-10">
 
 
-    <main className="max-w-6xl mx-auto px-4 sm:px-6 py-8 space-y-10">
+      <div className="flex justify-between items-center mb-8">
 
 
+        <h1 className="text-4xl font-bold">
+          Writer Dashboard
+        </h1>
 
 
 
-      {/* SEARCH */}
+        <Link
 
+          href="/dashboard/new"
 
+          className="
+          px-5
+          py-3
+          bg-black
+          text-white
+          rounded-lg
+          "
+        >
 
-      <SearchBar />
+          + New Article
 
+        </Link>
 
 
+      </div>
 
 
 
+      <Analytics />
 
-      {/* NEWS STYLE SCROLLING BANNER */}
 
 
+      <div className="flex gap-3 mb-6 flex-wrap">
 
-      <ScrollingBanner />
 
+        {(["all","published","pending","draft"] as Filter[])
+        .map((key)=>(
 
 
+          <button
 
+            key={key}
 
+            onClick={()=>setFilter(key)}
 
+            className={`
+              px-4
+              py-2
+              rounded
+              border
+              ${filter===key
+                ?"bg-black text-white"
+                :""
+              }
+            `}
 
-      {/* MAGAZINE COVER HERO */}
+          >
 
+            {key} ({count[key]})
 
 
-      <HeroSection
+          </button>
 
-        featured={featured ?? null}
 
-      />
-
-
-
-
-
-
-
-      {!featured && (
-
-
-
-        <div className="text-center text-gray-500 py-6">
-
-          No featured article yet.
-
-        </div>
-
-
-
-      )}
-
-
-
-
-
-
-
-
-
-      {/* ARTICLES + TRENDING */}
-
-
-
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-10">
-
-
-
-
-
-        <div className="lg:col-span-2">
-
-
-
-          {latest.length > 0 ? (
-
-
-
-            <LatestSection
-
-              articles={latest}
-
-            />
-
-
-
-          ) : (
-
-
-
-            <p className="text-gray-500">
-
-              No articles found.
-
-            </p>
-
-
-
-          )}
-
-
-
-        </div>
-
-
-
-
-
-
-
-
-
-        <aside className="space-y-8">
-
-
-
-          {trending.length > 0 ? (
-
-
-
-            <TrendingSection
-
-              articles={trending}
-
-            />
-
-
-
-          ) : (
-
-
-
-            <p className="text-gray-500">
-
-              No trending articles.
-
-            </p>
-
-
-
-          )}
-
-
-
-        </aside>
-
-
-
+        ))}
 
 
       </div>
@@ -258,26 +163,267 @@ export default function Home() {
 
 
 
+      <div className="overflow-x-auto border rounded-xl">
+
+
+        <table className="min-w-full">
+
+
+          <thead className="bg-gray-100">
+
+            <tr>
+
+              <th className="px-5 py-4 text-left">
+                Cover
+              </th>
+
+
+              <th className="px-5 py-4 text-left">
+                Title
+              </th>
+
+
+              <th className="px-5 py-4 text-left">
+                Category
+              </th>
+
+
+              <th className="px-5 py-4 text-left">
+                Status
+              </th>
+
+
+              <th className="px-5 py-4 text-left">
+                Views
+              </th>
+
+
+              <th className="px-5 py-4 text-left">
+                Date
+              </th>
+
+
+              <th className="px-5 py-4 text-left">
+                Actions
+              </th>
+
+
+            </tr>
+
+          </thead>
+
+
+
+          <tbody>
+
+
+          {filteredArticles.map((article)=>(
+
+
+            <tr
+              key={article.id}
+              className="border-t"
+            >
+
+
+              <td className="px-5 py-4">
+
+
+                {article.coverImage ? (
+
+                  <img
+
+                    src={article.coverImage}
+
+                    alt={article.title}
+
+                    className="
+                    w-20
+                    h-14
+                    object-cover
+                    rounded
+                    "
+
+                  />
+
+                ):(
+
+                  <div className="
+                    w-20
+                    h-14
+                    bg-gray-200
+                    rounded
+                  "/>
+
+                )}
+
+
+              </td>
 
 
 
 
-
-      <CategorySection />
-
+              <td className="px-5 py-4">
 
 
+                <p className="font-semibold">
+
+                  {article.title}
+
+                </p>
 
 
-      <NewsletterSection />
+
+                <p className="text-xs text-gray-500">
+
+                  {article.author}
+
+                </p>
+
+
+              </td>
 
 
 
+
+              <td className="px-5 py-4">
+
+                {article.category}
+
+              </td>
+
+
+
+
+              <td className="px-5 py-4">
+
+                <span className="
+                  text-xs
+                  px-3
+                  py-1
+                  rounded
+                  bg-gray-100
+                ">
+
+                  {article.status}
+
+                </span>
+
+
+              </td>
+
+
+
+
+              <td className="px-5 py-4">
+
+                {article.views || 0}
+
+              </td>
+
+
+
+              <td className="px-5 py-4">
+
+                {article.createdAt}
+
+              </td>
+
+
+
+
+              <td className="px-5 py-4 flex gap-2">
+
+
+                <Link
+
+                  href={`/dashboard/edit/${article.id}`}
+
+                  className="
+                  px-3
+                  py-1
+                  border
+                  rounded
+                  "
+
+                >
+
+                  Edit
+
+                </Link>
+
+
+
+
+                {article.status==="draft" && (
+
+                  <button
+
+                    onClick={()=>updateArticle(
+                      article.id,
+                      {
+                        status:"pending"
+                      }
+                    )}
+
+                    className="
+                    px-3
+                    py-1
+                    bg-yellow-600
+                    text-white
+                    rounded
+                    "
+
+                  >
+
+                    Submit Review
+
+                  </button>
+
+                )}
+
+
+
+
+                <button
+
+                  onClick={()=>deleteArticle(article.id)}
+
+                  className="
+                  px-3
+                  py-1
+                  bg-red-600
+                  text-white
+                  rounded
+                  "
+
+                >
+
+                  Delete
+
+                </button>
+
+
+              </td>
+
+
+
+            </tr>
+
+
+          ))}
+
+
+          </tbody>
+
+
+        </table>
+
+
+      </div>
 
 
     </main>
-
-
 
   );
 
