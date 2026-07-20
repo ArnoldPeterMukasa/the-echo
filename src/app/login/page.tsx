@@ -1,10 +1,30 @@
 "use client";
 
-
 import { signIn } from "next-auth/react";
+import { useState } from "react";
 
 
 export default function LoginPage(){
+
+const [email,setEmail]=useState("");
+const [password,setPassword]=useState("");
+
+
+
+const login=async()=>{
+
+ await signIn(
+  "credentials",
+  {
+    email,
+    password,
+    callbackUrl:"/dashboard"
+  }
+ );
+
+};
+
+
 
 return(
 
@@ -20,38 +40,107 @@ justify-center
 border
 rounded-xl
 p-10
-text-center
+w-96
 ">
 
 
-<h1 className="text-3xl font-bold">
-Login to The Echo
+<h1 className="
+text-3xl
+font-bold
+mb-6
+">
+Login To The Echo
 </h1>
 
 
-<p className="text-gray-500 mt-3">
-Writers and editors only
-</p>
+
+<input
+
+className="
+border
+p-3
+w-full
+mb-3
+rounded
+"
+
+placeholder="Email"
+
+value={email}
+
+onChange={(e)=>setEmail(e.target.value)}
+
+/>
+
+
+
+<input
+
+type="password"
+
+className="
+border
+p-3
+w-full
+mb-4
+rounded
+"
+
+placeholder="Password"
+
+value={password}
+
+onChange={(e)=>setPassword(e.target.value)}
+
+/>
 
 
 
 <button
 
-onClick={()=>signIn("google")}
+onClick={login}
 
 className="
-mt-6
 bg-black
 text-white
-px-6
+w-full
 py-3
-rounded-lg
+rounded
 "
 
 >
+Login
+</button>
 
+
+
+<div className="my-5 text-center text-gray-400">
+OR
+</div>
+
+
+
+<button
+
+onClick={()=>
+ signIn(
+  "google",
+  {
+   callbackUrl:"/dashboard"
+  }
+ )
+}
+
+className="
+bg-red-600
+text-white
+w-full
+py-3
+rounded
+"
+
+>
 Continue with Google
-
 </button>
 
 
@@ -60,6 +149,6 @@ Continue with Google
 
 </main>
 
-);
+)
 
 }
