@@ -3,7 +3,9 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
-import { useSession, signIn } from "next-auth/react";
+import { useSession } from "next-auth/react";
+import { useRouter } from "next/navigation";
+
 import { useArticleStore } from "@/src/store/articleStore";
 import Analytics from "@/src/components/dashboard/Analytics";
 
@@ -13,6 +15,8 @@ export default function DashboardPage() {
 
   const { data: session, status } = useSession();
 
+  const router = useRouter();
+
   const {
     articles,
     hydrate,
@@ -20,30 +24,63 @@ export default function DashboardPage() {
     deleteArticle,
   } = useArticleStore();
 
+
   const [mounted, setMounted] = useState(false);
 
   const [filter, setFilter] = useState<Filter>("all");
 
+
+
   useEffect(() => {
 
-    if (status === "unauthenticated") {
 
-      signIn(undefined, {
-        callbackUrl: "/dashboard",
-      });
+    if (status === "loading") return;
+
+
+
+    if (!session) {
+
+      router.push("/auth/writer/login");
 
       return;
-    }
-
-    if (status === "authenticated") {
-
-      hydrate();
-
-      setMounted(true);
 
     }
 
-  }, [status, hydrate]);
+
+
+    if (session.user.role === "admin") {
+
+      router.push("/dashboard/admin");
+
+      return;
+
+    }
+
+
+
+    if (session.user.role !== "writer") {
+
+      router.push("/auth");
+
+      return;
+
+    }
+
+
+
+    hydrate();
+
+    setMounted(true);
+
+
+  }, [
+    status,
+    session,
+    router,
+    hydrate
+  ]);
+
+
 
   if (status === "loading") {
 
@@ -58,6 +95,16 @@ export default function DashboardPage() {
     );
 
   }
+
+
+
+  if (!session) {
+
+    return null;
+
+  }
+
+
 
   if (!mounted) {
 

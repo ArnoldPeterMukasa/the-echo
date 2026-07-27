@@ -3,9 +3,11 @@
 import { useSession } from "next-auth/react";
 import { useState, useEffect } from "react";
 
+
 export default function ProfilePage() {
 
   const { data: session } = useSession();
+
 
   const [firstName, setFirstName] = useState("");
 
@@ -20,18 +22,137 @@ export default function ProfilePage() {
   const [confirmPassword, setConfirmPassword] = useState("");
 
 
+  const [saving, setSaving] = useState(false);
 
-  useEffect(() => {
+  const [message, setMessage] = useState("");
 
-    if (!session?.user?.name) return;
 
-    const names = session.user.name.split(" ");
 
-    setFirstName(names[0] || "");
+  useEffect(()=>{
 
-    setLastName(names.slice(1).join(" ") || "");
 
-  }, [session]);
+    async function loadProfile(){
+
+      const res = await fetch("/api/profile");
+
+      if(res.ok){
+
+        const user = await res.json();
+
+
+        setFirstName(
+          user.firstName || ""
+        );
+
+
+        setLastName(
+          user.lastName || ""
+        );
+
+
+        setBio(
+          user.bio || ""
+        );
+
+      }
+
+    }
+
+
+    if(session){
+
+      loadProfile();
+
+    }
+
+
+  },[session]);
+
+
+
+
+
+  async function saveProfile(){
+
+
+    setSaving(true);
+
+    setMessage("");
+
+
+
+    try {
+
+
+      const response = await fetch(
+
+        "/api/profile",
+
+        {
+
+          method:"PUT",
+
+          headers:{
+
+            "Content-Type":"application/json",
+
+          },
+
+
+          body:JSON.stringify({
+
+            firstName,
+
+            lastName,
+
+            bio,
+
+          }),
+
+        }
+
+      );
+
+
+
+      if(response.ok){
+
+
+        setMessage(
+          "Profile updated successfully"
+        );
+
+
+      }else{
+
+
+        setMessage(
+          "Update failed"
+        );
+
+
+      }
+
+
+
+    }catch{
+
+
+      setMessage(
+        "Something went wrong"
+      );
+
+
+    }
+
+
+
+    setSaving(false);
+
+
+  }
+
+
 
 
 
@@ -48,7 +169,9 @@ export default function ProfilePage() {
 
 
 
+
       <div className="bg-white border rounded-2xl p-8 shadow-sm">
+
 
 
         <div className="flex flex-col items-center mb-10">
@@ -56,32 +179,38 @@ export default function ProfilePage() {
 
           <div
             className="
-              w-28
-              h-28
-              rounded-full
-              bg-black
-              text-white
-              flex
-              items-center
-              justify-center
-              text-4xl
-              font-bold
+            w-28
+            h-28
+            rounded-full
+            bg-black
+            text-white
+            flex
+            items-center
+            justify-center
+            text-4xl
+            font-bold
             "
           >
 
-            {firstName.charAt(0).toUpperCase()}
+            {firstName
+              ? firstName.charAt(0).toUpperCase()
+              : "U"
+            }
 
           </div>
 
 
+
           <button
+
             className="
-              mt-4
-              border
-              rounded-lg
-              px-4
-              py-2
+            mt-4
+            border
+            rounded-lg
+            px-4
+            py-2
             "
+
           >
 
             Change Photo
@@ -90,6 +219,8 @@ export default function ProfilePage() {
 
 
         </div>
+
+
 
 
 
@@ -104,13 +235,21 @@ export default function ProfilePage() {
 
             </label>
 
+
             <input
 
               value={firstName}
 
-              onChange={(e)=>setFirstName(e.target.value)}
+              onChange={(e)=>
+                setFirstName(e.target.value)
+              }
 
-              className="w-full border rounded-xl p-3"
+              className="
+              w-full
+              border
+              rounded-xl
+              p-3
+              "
 
             />
 
@@ -118,7 +257,10 @@ export default function ProfilePage() {
 
 
 
+
+
           <div>
+
 
             <label className="block mb-2 font-medium">
 
@@ -126,15 +268,26 @@ export default function ProfilePage() {
 
             </label>
 
+
+
             <input
 
               value={lastName}
 
-              onChange={(e)=>setLastName(e.target.value)}
+              onChange={(e)=>
+                setLastName(e.target.value)
+              }
 
-              className="w-full border rounded-xl p-3"
+
+              className="
+              w-full
+              border
+              rounded-xl
+              p-3
+              "
 
             />
+
 
           </div>
 
@@ -143,7 +296,11 @@ export default function ProfilePage() {
 
 
 
+
+
+
         <div className="mt-6">
+
 
           <label className="block mb-2 font-medium">
 
@@ -151,19 +308,33 @@ export default function ProfilePage() {
 
           </label>
 
+
+
           <textarea
 
             rows={5}
 
             value={bio}
 
-            onChange={(e)=>setBio(e.target.value)}
+            onChange={(e)=>
+              setBio(e.target.value)
+            }
 
-            className="w-full border rounded-xl p-3"
+
+            className="
+            w-full
+            border
+            rounded-xl
+            p-3
+            "
 
           />
 
+
         </div>
+
+
+
 
 
 
@@ -172,6 +343,8 @@ export default function ProfilePage() {
           Change Password
 
         </h2>
+
+
 
 
 
@@ -186,11 +359,21 @@ export default function ProfilePage() {
 
             value={currentPassword}
 
-            onChange={(e)=>setCurrentPassword(e.target.value)}
+            onChange={(e)=>
+              setCurrentPassword(e.target.value)
+            }
 
-            className="w-full border rounded-xl p-3"
+
+            className="
+            w-full
+            border
+            rounded-xl
+            p-3
+            "
 
           />
+
+
 
 
           <input
@@ -201,11 +384,21 @@ export default function ProfilePage() {
 
             value={newPassword}
 
-            onChange={(e)=>setNewPassword(e.target.value)}
+            onChange={(e)=>
+              setNewPassword(e.target.value)
+            }
 
-            className="w-full border rounded-xl p-3"
+
+            className="
+            w-full
+            border
+            rounded-xl
+            p-3
+            "
 
           />
+
+
 
 
           <input
@@ -216,32 +409,75 @@ export default function ProfilePage() {
 
             value={confirmPassword}
 
-            onChange={(e)=>setConfirmPassword(e.target.value)}
+            onChange={(e)=>
+              setConfirmPassword(e.target.value)
+            }
 
-            className="w-full border rounded-xl p-3"
+
+            className="
+            w-full
+            border
+            rounded-xl
+            p-3
+            "
 
           />
+
 
 
         </div>
 
 
 
+
+
+
         <button
+
+
+          disabled={saving}
+
+
+          onClick={saveProfile}
+
+
+
           className="
-            mt-10
-            bg-black
-            text-white
-            px-8
-            py-3
-            rounded-xl
-            font-semibold
+          mt-10
+          bg-black
+          text-white
+          px-8
+          py-3
+          rounded-xl
+          font-semibold
+          disabled:opacity-50
           "
+
         >
 
-          Save Changes
+
+          {saving
+            ? "Saving..."
+            : "Save Changes"
+          }
+
 
         </button>
+
+
+
+
+        {message && (
+
+          <p className="mt-4 text-sm text-gray-600">
+
+            {message}
+
+          </p>
+
+        )}
+
+
 
 
       </div>

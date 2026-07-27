@@ -1,18 +1,22 @@
 "use client";
 
 import { useEffect } from "react";
-import { useSession, signIn } from "next-auth/react";
+import { useSession } from "next-auth/react";
+import { useRouter } from "next/navigation";
+
 import { useArticleStore } from "@/src/store/articleStore";
 import PendingQueue from "@/src/components/admin/PendingQueue";
 
 
 export default function AdminDashboard() {
 
-
   const {
     data: session,
     status,
   } = useSession();
+
+
+  const router = useRouter();
 
 
   const { hydrate } = useArticleStore();
@@ -21,12 +25,14 @@ export default function AdminDashboard() {
 
   useEffect(() => {
 
+    if (status === "loading") {
+      return;
+    }
 
-    if (status === "unauthenticated") {
 
-      signIn(undefined, {
-        callbackUrl: "/dashboard/admin",
-      });
+    if (!session) {
+
+      router.push("/auth/admin");
 
       return;
 
@@ -34,18 +40,25 @@ export default function AdminDashboard() {
 
 
 
-    if (status === "authenticated") {
+    if (session.user.role !== "admin") {
 
-      hydrate();
+      router.push("/dashboard");
+
+      return;
 
     }
 
 
+
+    hydrate();
+
+
   }, [
+    session,
     status,
+    router,
     hydrate
   ]);
-
 
 
 
@@ -53,16 +66,15 @@ export default function AdminDashboard() {
 
     return (
 
-      <main className="max-w-6xl mx-auto px-6 py-10">
+      <main className="p-10 text-center text-gray-500">
 
-        Checking authentication...
+        Checking access...
 
       </main>
 
     );
 
   }
-
 
 
 
@@ -74,21 +86,37 @@ export default function AdminDashboard() {
 
 
 
+  if (session.user.role !== "admin") {
+
+    return null;
+
+  }
+
+
 
   return (
 
     <main className="max-w-6xl mx-auto px-6 py-10">
 
 
-      <h1 className="text-4xl font-bold mb-8">
-        Admin Review Panel
-      </h1>
+      <div className="mb-8">
 
 
+        <h1 className="text-4xl font-bold">
 
-      <p className="text-gray-500 mb-6">
-        Review submitted articles before publishing.
-      </p>
+          Admin Review Panel
+
+        </h1>
+
+
+        <p className="text-gray-500 mt-2">
+
+          Review submitted articles before publishing.
+
+        </p>
+
+
+      </div>
 
 
 
