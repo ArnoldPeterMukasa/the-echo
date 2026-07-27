@@ -6,6 +6,7 @@ import { useState, useEffect } from "react";
 
 export default function ProfilePage() {
 
+
   const { data: session } = useSession();
 
 
@@ -15,16 +16,20 @@ export default function ProfilePage() {
 
   const [bio, setBio] = useState("");
 
+  const [image, setImage] = useState("");
+
   const [currentPassword, setCurrentPassword] = useState("");
 
   const [newPassword, setNewPassword] = useState("");
 
   const [confirmPassword, setConfirmPassword] = useState("");
 
-
   const [saving, setSaving] = useState(false);
 
+  const [uploading, setUploading] = useState(false);
+
   const [message, setMessage] = useState("");
+
 
 
 
@@ -33,11 +38,18 @@ export default function ProfilePage() {
 
     async function loadProfile(){
 
-      const res = await fetch("/api/profile");
+
+      const res =
+        await fetch("/api/profile");
+
+
 
       if(res.ok){
 
-        const user = await res.json();
+
+        const user =
+          await res.json();
+
 
 
         setFirstName(
@@ -54,9 +66,16 @@ export default function ProfilePage() {
           user.bio || ""
         );
 
+
+        setImage(
+          user.image || ""
+        );
+
       }
 
+
     }
+
 
 
     if(session){
@@ -67,6 +86,140 @@ export default function ProfilePage() {
 
 
   },[session]);
+
+
+
+
+
+
+  async function uploadPhoto(
+    e: React.ChangeEvent<HTMLInputElement>
+  ){
+
+
+    const file =
+      e.target.files?.[0];
+
+
+    if(!file) return;
+
+
+
+    setUploading(true);
+
+
+
+    try {
+
+
+      const formData =
+        new FormData();
+
+
+
+      formData.append(
+        "file",
+        file
+      );
+
+
+
+      formData.append(
+
+        "upload_preset",
+
+        process.env
+          .NEXT_PUBLIC_CLOUDINARY_UPLOAD_PRESET!
+
+      );
+
+
+
+      const upload =
+        await fetch(
+
+          `https://api.cloudinary.com/v1_1/${process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME}/image/upload`,
+
+          {
+            method:"POST",
+            body:formData,
+          }
+
+        );
+
+
+
+      const data =
+        await upload.json();
+
+
+
+      const imageUrl =
+        data.secure_url;
+
+
+
+      setImage(imageUrl);
+
+
+
+      await fetch(
+
+        "/api/upload/avatar",
+
+        {
+
+          method:"POST",
+
+          headers:{
+
+            "Content-Type":
+              "application/json",
+
+          },
+
+          body:JSON.stringify({
+
+            image:imageUrl,
+
+            email:
+              session?.user?.email,
+
+          }),
+
+        }
+
+      );
+
+
+
+      setMessage(
+        "Profile photo updated"
+      );
+
+
+
+    }catch(error){
+
+
+      console.error(error);
+
+
+      setMessage(
+        "Photo upload failed"
+      );
+
+
+    }
+
+
+
+    setUploading(false);
+
+
+  }
+
+
 
 
 
@@ -84,34 +237,35 @@ export default function ProfilePage() {
     try {
 
 
-      const response = await fetch(
+      const response =
+        await fetch(
 
-        "/api/profile",
+          "/api/profile",
 
-        {
+          {
 
-          method:"PUT",
+            method:"PUT",
 
-          headers:{
+            headers:{
 
-            "Content-Type":"application/json",
+              "Content-Type":
+                "application/json",
 
-          },
+            },
 
+            body:JSON.stringify({
 
-          body:JSON.stringify({
+              firstName,
 
-            firstName,
+              lastName,
 
-            lastName,
+              bio,
 
-            bio,
+            }),
 
-          }),
+          }
 
-        }
-
-      );
+        );
 
 
 
@@ -156,6 +310,21 @@ export default function ProfilePage() {
 
 
 
+
+  const initials = (
+
+    (firstName.charAt(0) || "") +
+
+    (lastName.charAt(0) || "")
+
+  ).toUpperCase();
+
+
+
+
+
+
+
   return (
 
     <main className="max-w-3xl mx-auto px-6 py-10">
@@ -174,10 +343,14 @@ export default function ProfilePage() {
 
 
 
+
+
         <div className="flex flex-col items-center mb-10">
 
 
+
           <div
+
             className="
             w-28
             h-28
@@ -189,19 +362,44 @@ export default function ProfilePage() {
             justify-center
             text-4xl
             font-bold
+            overflow-hidden
             "
+
           >
 
-            {firstName
-              ? firstName.charAt(0).toUpperCase()
-              : "U"
-            }
+
+            {image ? (
+
+              <img
+
+                src={image}
+
+                alt="Profile"
+
+                className="
+                w-full
+                h-full
+                object-cover
+                "
+
+              />
+
+
+            ) : (
+
+              initials || "U"
+
+            )}
+
+
 
           </div>
 
 
 
-          <button
+
+
+          <label
 
             className="
             mt-4
@@ -209,13 +407,33 @@ export default function ProfilePage() {
             rounded-lg
             px-4
             py-2
+            cursor-pointer
             "
 
           >
 
-            Change Photo
+            {uploading
+              ? "Uploading..."
+              : "Change Photo"
+            }
 
-          </button>
+
+
+            <input
+
+              type="file"
+
+              accept="image/*"
+
+              hidden
+
+              onChange={uploadPhoto}
+
+            />
+
+
+          </label>
+
 
 
         </div>
@@ -224,7 +442,10 @@ export default function ProfilePage() {
 
 
 
+
+
         <div className="grid md:grid-cols-2 gap-6">
+
 
 
           <div>
@@ -252,6 +473,7 @@ export default function ProfilePage() {
               "
 
             />
+
 
           </div>
 
@@ -293,6 +515,7 @@ export default function ProfilePage() {
 
 
         </div>
+
 
 
 
@@ -348,7 +571,9 @@ export default function ProfilePage() {
 
 
 
+
         <div className="space-y-5">
+
 
 
           <input
@@ -376,6 +601,7 @@ export default function ProfilePage() {
 
 
 
+
           <input
 
             type="password"
@@ -397,6 +623,7 @@ export default function ProfilePage() {
             "
 
           />
+
 
 
 
@@ -432,6 +659,7 @@ export default function ProfilePage() {
 
 
 
+
         <button
 
 
@@ -453,6 +681,7 @@ export default function ProfilePage() {
           disabled:opacity-50
           "
 
+
         >
 
 
@@ -467,7 +696,10 @@ export default function ProfilePage() {
 
 
 
+
+
         {message && (
+
 
           <p className="mt-4 text-sm text-gray-600">
 
@@ -475,7 +707,9 @@ export default function ProfilePage() {
 
           </p>
 
+
         )}
+
 
 
 
@@ -486,5 +720,6 @@ export default function ProfilePage() {
     </main>
 
   );
+
 
 }
