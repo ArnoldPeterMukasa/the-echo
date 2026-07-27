@@ -1,49 +1,49 @@
-import mongoose, { Schema, model, models } from "mongoose";
-
+import mongoose, {
+  Schema,
+  models,
+  model,
+} from "mongoose";
 
 const UserSchema = new Schema(
 
   {
+
     firstName: {
       type: String,
       required: true,
-      trim: true,
     },
-
 
     lastName: {
       type: String,
       required: true,
-      trim: true,
     },
-
 
     email: {
       type: String,
       required: true,
       unique: true,
-      lowercase: true,
-      trim: true,
     },
-
 
     password: {
       type: String,
       required: true,
     },
 
-
     role: {
       type: String,
       enum: [
+        "admin",
         "writer",
-        "admin"
       ],
       default: "writer",
     },
 
-
     image: {
+      type: String,
+      default: "",
+    },
+
+    bio: {
       type: String,
       default: "",
     },
@@ -56,14 +56,8 @@ const UserSchema = new Schema(
 
 );
 
-
-
-const User =
-  models.User ||
-  model(
-    "User",
-    UserSchema
-  );
-
-
-export default User;
+export default models.User ||
+model(
+  "User",
+  UserSchema
+);
