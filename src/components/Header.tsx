@@ -3,7 +3,6 @@
 import Link from "next/link";
 import { useState } from "react";
 import { useSession, signOut } from "next-auth/react";
-import { User, LogOut, ChevronDown } from "lucide-react";
 
 
 export default function Header() {
@@ -34,12 +33,10 @@ export default function Header() {
 
 
   const initials =
-
     (
       (names[0]?.charAt(0) || "") +
       (names[1]?.charAt(0) || "")
     ).toUpperCase();
-
 
 
 
@@ -135,18 +132,25 @@ export default function Header() {
           ) : (
 
 
+
             <div className="relative">
+
 
 
               <button
 
-                onClick={()=>setOpen(!open)}
+
+                onClick={() =>
+                  setOpen(!open)
+                }
+
 
                 className="
                 flex
                 items-center
                 gap-3
                 "
+
 
               >
 
@@ -164,11 +168,39 @@ export default function Header() {
                   items-center
                   justify-center
                   font-bold
+                  overflow-hidden
                   "
 
                 >
 
-                  {initials}
+
+
+                  {session.user.image ? (
+
+
+                    <img
+
+                      src={session.user.image}
+
+                      alt="Profile"
+
+                      className="
+                      w-full
+                      h-full
+                      object-cover
+                      "
+
+                    />
+
+
+                  ) : (
+
+
+                    initials || "U"
+
+
+                  )}
+
 
 
                 </div>
@@ -176,15 +208,24 @@ export default function Header() {
 
 
 
+
                 <span className="font-semibold">
 
+
                   {firstName}
+
 
                 </span>
 
 
 
-                <ChevronDown size={18}/>
+
+
+                <span>
+
+                  ▼
+
+                </span>
 
 
 
@@ -195,8 +236,8 @@ export default function Header() {
 
 
 
-
               {open && (
+
 
 
                 <div
@@ -214,8 +255,6 @@ export default function Header() {
                   "
 
                 >
-
-
 
 
 
@@ -250,12 +289,16 @@ export default function Header() {
 
 
 
-
                   <Link
+
 
                     href="/profile"
 
-                    onClick={()=>setOpen(false)}
+
+                    onClick={() =>
+                      setOpen(false)
+                    }
+
 
                     className="
                     flex
@@ -266,12 +309,10 @@ export default function Header() {
                     hover:bg-gray-100
                     "
 
+
                   >
 
-                    <User size={17}/>
-
                     Edit Profile
-
 
                   </Link>
 
@@ -284,11 +325,13 @@ export default function Header() {
                   <button
 
 
-                    onClick={()=>signOut({
+                    onClick={() =>
+                      signOut({
 
-                      callbackUrl:"/home"
+                        callbackUrl:"/home",
 
-                    })}
+                      })
+                    }
 
 
                     className="
@@ -303,13 +346,10 @@ export default function Header() {
                     text-red-600
                     "
 
+
                   >
 
-
-                    <LogOut size={17}/>
-
                     Logout
-
 
                   </button>
 
@@ -320,11 +360,13 @@ export default function Header() {
                 </div>
 
 
+
               )}
 
 
 
             </div>
+
 
 
           )}
@@ -338,9 +380,10 @@ export default function Header() {
       </div>
 
 
-
     </header>
 
+
   );
+
 
 }
