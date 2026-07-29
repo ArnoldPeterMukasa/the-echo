@@ -7,17 +7,10 @@ import { useSession, signOut } from "next-auth/react";
 
 export default function Header() {
 
+  const { data: session } = useSession();
 
-  const { data: session } =
-    useSession();
-
-
-  const [open,setOpen] =
-    useState(false);
-
-
-  const [mobile,setMobile] =
-    useState(false);
+  const [open, setOpen] = useState(false);
+  const [mobile, setMobile] = useState(false);
 
 
 
@@ -36,6 +29,11 @@ export default function Header() {
     ).toUpperCase();
 
 
+
+  function closeMenus(){
+    setMobile(false);
+    setOpen(false);
+  }
 
 
 
@@ -61,18 +59,25 @@ justify-between
 ">
 
 
-
-<Link href="/home">
+<Link href="/home" onClick={closeMenus}>
 
 <div>
 
-<h1 className="text-2xl font-bold">
+<h1 className="
+text-2xl
+font-bold
+">
 The Echo
 </h1>
 
-<p className="text-xs text-gray-500">
+
+<p className="
+text-xs
+text-gray-500
+">
 Echoing Reality of Thousands...
 </p>
+
 
 </div>
 
@@ -89,13 +94,16 @@ md:hidden
 text-2xl
 "
 
-onClick={()=>
-setMobile(!mobile)
-}
+aria-label="Toggle menu"
+
+onClick={()=> {
+  setMobile(!mobile);
+  setOpen(false);
+}}
 
 >
 
-☰
+{mobile ? "✕" : "☰"}
 
 </button>
 
@@ -104,46 +112,70 @@ setMobile(!mobile)
 
 
 
-<nav className={`
+<nav
+
+className={`
+
 ${mobile ? "flex" : "hidden"}
+
 md:flex
+
 absolute
+
 md:static
+
 top-16
+
 left-0
+
 right-0
+
 bg-white
+
 md:bg-transparent
+
 border-b
+
 md:border-none
+
 flex-col
+
 md:flex-row
+
 items-center
+
 gap-6
+
 p-6
+
 md:p-0
+
 text-sm
+
 font-medium
-`}>
+
+`}
+
+>
 
 
 
-<Link href="/home">
+<Link href="/home" onClick={closeMenus}>
 Home
 </Link>
 
 
-<Link href="/articles">
+
+<Link href="/articles" onClick={closeMenus}>
 Articles
 </Link>
 
 
 
 
-
 {session && (
 
-<Link href="/dashboard">
+<Link href="/dashboard" onClick={closeMenus}>
 Dashboard
 </Link>
 
@@ -151,12 +183,16 @@ Dashboard
 
 
 
-<Link href="/about">
+
+
+<Link href="/about" onClick={closeMenus}>
 About
 </Link>
 
 
-<Link href="/contact">
+
+
+<Link href="/contact" onClick={closeMenus}>
 Contact
 </Link>
 
@@ -166,15 +202,21 @@ Contact
 
 
 
+
 {!session ? (
 
-
-<>
+<div className="
+flex
+gap-3
+items-center
+">
 
 
 <Link
 
 href="/auth"
+
+onClick={closeMenus}
 
 className="
 px-4
@@ -192,9 +234,12 @@ Login
 
 
 
+
 <Link
 
 href="/auth/register"
+
+onClick={closeMenus}
 
 className="
 px-4
@@ -210,7 +255,7 @@ Sign Up
 </Link>
 
 
-</>
+</div>
 
 
 
@@ -223,9 +268,7 @@ Sign Up
 
 <button
 
-onClick={()=>
-setOpen(!open)
-}
+onClick={()=>setOpen(!open)}
 
 className="
 flex
@@ -256,7 +299,7 @@ overflow-hidden
 
 src={session.user.image}
 
-alt="profile"
+alt="Profile"
 
 className="
 w-full
@@ -266,11 +309,9 @@ object-cover
 
 />
 
-):(
-
+) : (
 
 initials || "U"
-
 
 )}
 
@@ -292,7 +333,11 @@ initials || "U"
 </span>
 
 
+
 </button>
+
+
+
 
 
 
@@ -300,17 +345,26 @@ initials || "U"
 
 {open && (
 
-
 <div className="
+
 absolute
+
 right-0
+
 mt-3
+
 w-60
+
 bg-white
+
 border
+
 rounded-xl
+
 shadow-lg
+
 overflow-hidden
+
 ">
 
 
@@ -327,14 +381,21 @@ border-b
 </p>
 
 
-<p className="text-xs text-gray-500">
+<p className="
+text-xs
+text-gray-500
+">
 
 {session.user.email}
 
 </p>
 
 
-<p className="text-xs text-gray-400 capitalize">
+<p className="
+text-xs
+text-gray-400
+capitalize
+">
 
 {session.user.role}
 
@@ -350,6 +411,8 @@ border-b
 <Link
 
 href="/profile"
+
+onClick={closeMenus}
 
 className="
 block
@@ -370,11 +433,9 @@ Edit Profile
 
 <button
 
-onClick={()=>
-signOut({
+onClick={()=>signOut({
 callbackUrl:"/home"
-})
-}
+})}
 
 className="
 w-full
@@ -394,13 +455,11 @@ Logout
 
 </div>
 
-
 )}
 
 
 
 </div>
-
 
 
 )}
@@ -411,12 +470,10 @@ Logout
 </nav>
 
 
-
 </div>
 
 
 </header>
-
 
   );
 
