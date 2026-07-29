@@ -13,7 +13,7 @@ type Article = {
 
   slug: string;
 
-  summary: string;
+  excerpt: string;
 
   content: string;
 
@@ -26,6 +26,7 @@ type Article = {
   status?: string;
 
   createdAt: string;
+
 
   author?: {
 
@@ -50,11 +51,17 @@ export default function ArticlePage() {
   const { slug } = useParams();
 
 
-  const [article, setArticle] = useState<Article | null>(null);
+  const [article, setArticle] =
+    useState<Article | null>(null);
 
-  const [related, setRelated] = useState<Article[]>([]);
 
-  const [loading, setLoading] = useState(true);
+  const [related, setRelated] =
+    useState<Article[]>([]);
+
+
+  const [loading, setLoading] =
+    useState(true);
+
 
 
 
@@ -79,9 +86,10 @@ export default function ArticlePage() {
 
 
 
+
         const found =
           data.find(
-            (item: Article)=>
+            (item:Article)=>
               item.slug === slug
           );
 
@@ -95,12 +103,15 @@ export default function ArticlePage() {
 
 
           const relatedArticles =
-            data
-            .filter(
-              (item: Article)=>
+            data.filter(
+              (item:Article)=>
+
                 item.category === found.category &&
-                item.slug !== found.slug &&
+
+                item._id !== found._id &&
+
                 item.status === "published"
+
             )
             .slice(0,4);
 
@@ -109,18 +120,17 @@ export default function ArticlePage() {
           setRelated(relatedArticles);
 
 
-
         }
 
 
 
-      } catch(error){
+      }catch(error){
 
 
         console.error(error);
 
 
-      } finally {
+      }finally{
 
 
         setLoading(false);
@@ -140,7 +150,6 @@ export default function ArticlePage() {
     }
 
 
-
   },[slug]);
 
 
@@ -154,9 +163,14 @@ export default function ArticlePage() {
 
     return (
 
-      <main className="max-w-3xl mx-auto px-6 py-16">
+      <main className="
+        max-w-3xl
+        mx-auto
+        px-6
+        py-16
+      ">
 
-        <p className="text-gray-500">
+        <p className="text-gray-500 text-center">
 
           Loading article...
 
@@ -166,7 +180,9 @@ export default function ArticlePage() {
 
     );
 
+
   }
+
 
 
 
@@ -178,7 +194,13 @@ export default function ArticlePage() {
 
     return (
 
-      <main className="max-w-3xl mx-auto px-6 py-16 text-center">
+      <main className="
+        max-w-3xl
+        mx-auto
+        px-6
+        py-16
+        text-center
+      ">
 
 
         <h1 className="text-2xl font-bold">
@@ -196,13 +218,14 @@ export default function ArticlePage() {
         </p>
 
 
-
       </main>
 
     );
 
 
   }
+
+
 
 
 
@@ -222,13 +245,26 @@ export default function ArticlePage() {
 
 
 
+
   return (
 
-    <main className="max-w-3xl mx-auto px-4 sm:px-6 py-10">
+    <main className="
+      max-w-3xl
+      mx-auto
+      px-4
+      sm:px-6
+      py-10
+    ">
 
 
 
-      <p className="text-sm uppercase text-gray-500">
+
+
+      <p className="
+        text-sm
+        uppercase
+        text-gray-500
+      ">
 
         {article.category}
 
@@ -238,7 +274,14 @@ export default function ArticlePage() {
 
 
 
-      <h1 className="text-3xl sm:text-5xl font-bold mt-3">
+
+
+      <h1 className="
+        text-3xl
+        sm:text-5xl
+        font-bold
+        mt-3
+      ">
 
         {article.title}
 
@@ -249,12 +292,22 @@ export default function ArticlePage() {
 
 
 
-      <div className="text-sm text-gray-500 mt-4 flex flex-wrap gap-2">
+
+      <div className="
+        text-sm
+        text-gray-500
+        mt-4
+        flex
+        flex-wrap
+        gap-2
+        items-center
+      ">
 
 
         <span>
 
           By{" "}
+
 
           {article.author ? (
 
@@ -262,12 +315,17 @@ export default function ArticlePage() {
 
               href={`/author/${article.author._id}`}
 
-              className="underline hover:text-black"
+              className="
+              underline
+              hover:text-black
+              "
 
             >
 
               {article.author.firstName}{" "}
+
               {article.author.lastName}
+
 
             </Link>
 
@@ -278,7 +336,9 @@ export default function ArticlePage() {
 
           )}
 
+
         </span>
+
 
 
 
@@ -293,6 +353,7 @@ export default function ArticlePage() {
           ).toLocaleDateString()}
 
         </span>
+
 
 
 
@@ -321,6 +382,7 @@ export default function ArticlePage() {
 
 
       </div>
+
 
 
 
@@ -358,9 +420,16 @@ export default function ArticlePage() {
 
 
 
-      <p className="mt-8 text-lg text-gray-700 leading-relaxed">
 
-        {article.summary}
+
+      <p className="
+        mt-8
+        text-lg
+        text-gray-700
+        leading-relaxed
+      ">
+
+        {article.excerpt}
 
       </p>
 
@@ -370,7 +439,13 @@ export default function ArticlePage() {
 
 
 
-      <div className="mt-8 text-lg leading-8 whitespace-pre-line">
+
+      <div className="
+        mt-8
+        text-lg
+        leading-8
+        whitespace-pre-line
+      ">
 
         {article.content}
 
@@ -383,18 +458,27 @@ export default function ArticlePage() {
 
 
 
+
       {related.length > 0 && (
 
 
-        <section className="mt-12 border-t pt-8">
+        <section className="
+          mt-12
+          border-t
+          pt-8
+        ">
 
 
-
-          <h2 className="text-xl font-bold mb-5">
+          <h2 className="
+            text-xl
+            font-bold
+            mb-5
+          ">
 
             Related Articles
 
           </h2>
+
 
 
 
@@ -423,6 +507,7 @@ export default function ArticlePage() {
               >
 
 
+
                 <h3 className="font-semibold">
 
                   {item.title}
@@ -434,9 +519,10 @@ export default function ArticlePage() {
 
                 <p className="text-sm text-gray-500">
 
-                  {item.summary}
+                  {item.excerpt}
 
                 </p>
+
 
 
               </Link>
@@ -454,6 +540,7 @@ export default function ArticlePage() {
 
 
       )}
+
 
 
 
