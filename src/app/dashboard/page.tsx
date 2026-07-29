@@ -6,28 +6,36 @@ import Link from "next/link";
 import { useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
 
-import { useArticleStore } from "@/src/store/articleStore";
 import Analytics from "@/src/components/dashboard/Analytics";
 
-type Filter = "all" | "published" | "pending" | "draft";
+
+type Filter =
+  | "all"
+  | "published"
+  | "pending"
+  | "draft";
+
 
 export default function DashboardPage() {
 
-  const { data: session, status } = useSession();
+
+  const {
+    data: session,
+    status
+  } = useSession();
+
 
   const router = useRouter();
 
-  const {
-    articles,
-    hydrate,
-    updateArticle,
-    deleteArticle,
-  } = useArticleStore();
 
+
+  const [articles, setArticles] = useState<any[]>([]);
 
   const [mounted, setMounted] = useState(false);
 
-  const [filter, setFilter] = useState<Filter>("all");
+  const [filter, setFilter] =
+    useState<Filter>("all");
+
 
 
 
@@ -68,21 +76,139 @@ export default function DashboardPage() {
 
 
 
-    hydrate();
 
-    setMounted(true);
+    async function loadArticles(){
+
+
+      try {
+
+
+        const response =
+          await fetch("/api/articles");
+
+
+        const data =
+          await response.json();
+
+
+        setArticles(data);
+
+
+
+      } catch(error){
+
+        console.error(error);
+
+      }
+
+
+
+      setMounted(true);
+
+
+    }
+
+
+
+    loadArticles();
+
 
 
   }, [
     status,
     session,
-    router,
-    hydrate
+    router
   ]);
 
 
 
-  if (status === "loading") {
+
+
+
+  async function deleteArticle(id:string){
+
+
+    await fetch(
+      `/api/articles/${id}`,
+      {
+        method:"DELETE",
+      }
+    );
+
+
+    setArticles((prev)=>
+      prev.filter(
+        (article)=>
+          article._id !== id
+      )
+    );
+
+
+  }
+
+
+
+
+
+
+
+  async function submitReview(id:string){
+
+
+    await fetch(
+
+      `/api/articles/${id}`,
+
+      {
+
+        method:"PUT",
+
+        headers:{
+          "Content-Type":
+            "application/json",
+        },
+
+
+        body:JSON.stringify({
+
+          status:"pending",
+
+        }),
+
+      }
+
+    );
+
+
+
+    setArticles((prev)=>
+
+      prev.map((article)=>
+
+        article._id === id
+
+        ? {
+            ...article,
+            status:"pending"
+          }
+
+        : article
+
+      )
+
+    );
+
+
+  }
+
+
+
+
+
+
+
+  if(status === "loading"){
+
 
     return (
 
@@ -98,7 +224,9 @@ export default function DashboardPage() {
 
 
 
-  if (!session) {
+
+
+  if(!session){
 
     return null;
 
@@ -106,7 +234,10 @@ export default function DashboardPage() {
 
 
 
-  if (!mounted) {
+
+
+  if(!mounted){
+
 
     return (
 
@@ -120,44 +251,79 @@ export default function DashboardPage() {
 
   }
 
-  const filteredArticles = articles.filter((article) => {
 
-    if (filter === "all") return true;
 
-    return article.status === filter;
 
-  });
+
+
+
+  const filteredArticles =
+    articles.filter((article)=>{
+
+
+      if(filter === "all")
+        return true;
+
+
+      return article.status === filter;
+
+
+    });
+
+
+
+
 
   const count = {
 
-    all: articles.length,
+
+    all:
+      articles.length,
+
 
     published:
       articles.filter(
-        (a) => a.status === "published"
+        (a)=>
+          a.status === "published"
       ).length,
+
 
     pending:
       articles.filter(
-        (a) => a.status === "pending"
+        (a)=>
+          a.status === "pending"
       ).length,
+
 
     draft:
       articles.filter(
-        (a) => a.status === "draft"
+        (a)=>
+          a.status === "draft"
       ).length,
 
+
   };
+
+
+
+
+
 
   return (
 
     <main className="max-w-7xl mx-auto px-6 py-10">
 
+
       <div className="flex justify-between items-center mb-8">
 
+
         <h1 className="text-4xl font-bold">
+
           Writer Dashboard
+
         </h1>
+
+
 
         <Link
 
@@ -177,45 +343,76 @@ export default function DashboardPage() {
 
         </Link>
 
+
       </div>
+
+
+
+
 
       <Analytics />
 
+
+
+
+
       <div className="flex gap-3 mb-6 flex-wrap">
 
-        {(["all", "published", "pending", "draft"] as Filter[])
-          .map((key) => (
 
-            <button
+        {(["all","published","pending","draft"] as Filter[])
+        .map((key)=>(
 
-              key={key}
 
-              onClick={() => setFilter(key)}
+          <button
 
-              className={`
-                px-4
-                py-2
-                rounded
-                border
-                ${filter === key
-                  ? "bg-black text-white"
-                  : ""
-                }
-              `}
+            key={key}
 
-            >
+            onClick={()=>
+              setFilter(key)
+            }
 
-              {key} ({count[key]})
+            className={`
 
-            </button>
+              px-4
 
-          ))}
+              py-2
+
+              rounded
+
+              border
+
+              ${
+                filter === key
+                ? "bg-black text-white"
+                : ""
+              }
+
+            `}
+
+          >
+
+            {key} ({count[key]})
+
+
+          </button>
+
+
+        ))}
+
 
       </div>
 
+
+
+
+
+
+
       <div className="overflow-x-auto border rounded-xl">
 
+
         <table className="min-w-full">
+
 
           <thead className="bg-gray-100">
 
@@ -249,187 +446,256 @@ export default function DashboardPage() {
                 Actions
               </th>
 
+
             </tr>
+
 
           </thead>
 
+
+
+
+
+
           <tbody>
 
-            {filteredArticles.map((article) => (
 
-              <tr
-                key={article.id}
-                className="border-t"
-              >
+          {filteredArticles.map((article)=>(
 
-                <td className="px-5 py-4">
 
-                  {article.coverImage ? (
+            <tr
 
-                    <img
+              key={article._id}
 
-                      src={article.coverImage}
+              className="border-t"
 
-                      alt={article.title}
+            >
 
-                      className="
-                      w-20
-                      h-14
-                      object-cover
-                      rounded
-                      "
 
-                    />
+              <td className="px-5 py-4">
 
-                  ) : (
 
-                    <div
-                      className="
-                      w-20
-                      h-14
-                      bg-gray-200
-                      rounded
-                      "
-                    />
+                {article.coverImage ? (
 
-                  )}
+                  <img
 
-                </td>
+                    src={article.coverImage}
 
-                <td className="px-5 py-4">
-
-                  <p className="font-semibold">
-
-                    {article.title}
-
-                  </p>
-
-                  <p className="text-xs text-gray-500">
-
-                    {article.author}
-
-                  </p>
-
-                </td>
-
-                <td className="px-5 py-4">
-
-                  {article.category}
-
-                </td>
-
-                <td className="px-5 py-4">
-
-                  <span
-                    className="
-                    text-xs
-                    px-3
-                    py-1
-                    rounded
-                    bg-gray-100
-                    "
-                  >
-
-                    {article.status}
-
-                  </span>
-
-                </td>
-
-                <td className="px-5 py-4">
-
-                  {article.views || 0}
-
-                </td>
-
-                <td className="px-5 py-4">
-
-                  {article.createdAt}
-
-                </td>
-
-                <td className="px-5 py-4 flex gap-2">
-
-                  <Link
-
-                    href={`/dashboard/edit/${article.id}`}
+                    alt={article.title}
 
                     className="
-                    px-3
-                    py-1
-                    border
+                    w-20
+                    h-14
+                    object-cover
                     rounded
                     "
 
-                  >
+                  />
 
-                    Edit
+                ):(
 
-                  </Link>
+                  <div className="
+                  w-20
+                  h-14
+                  bg-gray-200
+                  rounded
+                  "/>
 
-                  {article.status === "draft" && (
+                )}
 
-                    <button
 
-                      onClick={() =>
-                        updateArticle(
-                          article.id,
-                          {
-                            status: "pending",
-                          }
-                        )
-                      }
+              </td>
 
-                      className="
-                      px-3
-                      py-1
-                      bg-yellow-600
-                      text-white
-                      rounded
-                      "
 
-                    >
 
-                      Submit Review
 
-                    </button>
 
-                  )}
+              <td className="px-5 py-4">
+
+
+                <p className="font-semibold">
+
+                  {article.title}
+
+                </p>
+
+
+
+                <p className="text-xs text-gray-500">
+
+                  {article.author?.firstName
+                    ?
+                    `${article.author.firstName} ${article.author.lastName}`
+                    :
+                    "Unknown"
+                  }
+
+                </p>
+
+
+              </td>
+
+
+
+
+
+              <td className="px-5 py-4">
+
+                {article.category}
+
+              </td>
+
+
+
+
+              <td className="px-5 py-4">
+
+
+                <span className="
+                text-xs
+                px-3
+                py-1
+                rounded
+                bg-gray-100
+                ">
+
+                  {article.status}
+
+                </span>
+
+
+              </td>
+
+
+
+
+
+              <td className="px-5 py-4">
+
+                {article.views || 0}
+
+              </td>
+
+
+
+
+              <td className="px-5 py-4">
+
+                {new Date(article.createdAt)
+                .toISOString()
+                .split("T")[0]}
+
+              </td>
+
+
+
+
+
+              <td className="px-5 py-4 flex gap-2">
+
+
+
+                <Link
+
+                  href={`/dashboard/edit/${article._id}`}
+
+                  className="
+                  px-3
+                  py-1
+                  border
+                  rounded
+                  "
+
+                >
+
+                  Edit
+
+                </Link>
+
+
+
+
+
+                {article.status === "draft" && (
+
 
                   <button
 
-                    onClick={() =>
-                      deleteArticle(article.id)
+                    onClick={()=>
+                      submitReview(article._id)
                     }
 
                     className="
                     px-3
                     py-1
-                    bg-red-600
+                    bg-yellow-600
                     text-white
                     rounded
                     "
 
                   >
 
-                    Delete
+                    Submit Review
 
                   </button>
 
-                </td>
 
-              </tr>
+                )}
 
-            ))}
+
+
+
+
+
+                <button
+
+                  onClick={()=>
+                    deleteArticle(article._id)
+                  }
+
+                  className="
+                  px-3
+                  py-1
+                  bg-red-600
+                  text-white
+                  rounded
+                  "
+
+                >
+
+                  Delete
+
+                </button>
+
+
+
+              </td>
+
+
+
+
+            </tr>
+
+
+
+          ))}
+
 
           </tbody>
 
+
+
         </table>
 
+
+
       </div>
+
+
 
     </main>
 
   );
+
 
 }
