@@ -35,7 +35,11 @@ const ArticleSchema = new Schema(
 
     status: {
       type: String,
-      enum: ["draft", "pending", "published"],
+      enum: [
+        "draft",
+        "pending",
+        "published",
+      ],
       default: "draft",
     },
 
@@ -49,11 +53,26 @@ const ArticleSchema = new Schema(
       type: Number,
       default: 0,
     },
+
+    featured: {
+      type: Boolean,
+      default: false,
+    },
+
+    trending: {
+      type: Boolean,
+      default: false,
+    },
+
   },
   {
     timestamps: true,
   }
 );
 
+
 export default models.Article ||
-  mongoose.model("Article", ArticleSchema);
+  mongoose.model(
+    "Article",
+    ArticleSchema
+  );
