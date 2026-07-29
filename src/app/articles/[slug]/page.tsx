@@ -6,48 +6,28 @@ import Link from "next/link";
 
 
 type Article = {
-
   _id: string;
-
   title: string;
-
   slug: string;
-
   excerpt: string;
-
   content: string;
-
   category: string;
-
   coverImage?: string;
-
   views?: number;
-
   status?: string;
-
   createdAt: string;
 
-
   author?: {
-
     _id: string;
-
     firstName: string;
-
     lastName: string;
-
     image?: string;
-
   };
-
 };
 
 
 
-
-
 export default function ArticlePage() {
-
 
   const { slug } = useParams();
 
@@ -65,13 +45,10 @@ export default function ArticlePage() {
 
 
 
-
-
   useEffect(() => {
 
 
     async function loadArticle() {
-
 
       try {
 
@@ -85,7 +62,6 @@ export default function ArticlePage() {
 
 
 
-
         const found =
           data.find(
             (item: Article) =>
@@ -94,12 +70,27 @@ export default function ArticlePage() {
 
 
 
+        if (!found) {
+          setArticle(null);
+          return;
+        }
 
 
-        if (found) {
+
+        let updatedArticle = found;
 
 
-          // Increase views
+
+        const viewed =
+          sessionStorage.getItem(
+            `viewed-${found._id}`
+          );
+
+
+
+        if (!viewed) {
+
+
           const viewResponse =
             await fetch(
               `/api/articles/${found._id}/views`,
@@ -109,50 +100,50 @@ export default function ArticlePage() {
             );
 
 
-          const viewData =
-            await viewResponse.json();
+          if(viewResponse.ok){
+
+            const viewData =
+              await viewResponse.json();
 
 
+            updatedArticle = {
+              ...found,
+              views: viewData.views,
+            };
 
-          found.views =
-            viewData.views;
-
-
-
-
-          setArticle(found);
+          }
 
 
-
-
-
-
-          const relatedArticles =
-            data.filter(
-              (item: Article) =>
-
-                item.category === found.category &&
-
-                item._id !== found._id &&
-
-                item.status === "published"
-
-            )
-            .slice(0, 4);
-
-
-
-
-          setRelated(relatedArticles);
-
+          sessionStorage.setItem(
+            `viewed-${found._id}`,
+            "true"
+          );
 
 
         }
 
 
 
-      } catch(error) {
+        setArticle(updatedArticle);
 
+
+
+        const relatedArticles =
+          data.filter(
+            (item: Article) =>
+              item.category === found.category &&
+              item._id !== found._id &&
+              item.status === "published"
+          )
+          .slice(0,4);
+
+
+
+        setRelated(relatedArticles);
+
+
+
+      } catch(error){
 
         console.error(
           "Failed loading article",
@@ -162,59 +153,40 @@ export default function ArticlePage() {
 
       } finally {
 
-
         setLoading(false);
 
-
       }
-
 
     }
 
 
 
-
-
-    if(slug) {
+    if(slug){
 
       loadArticle();
 
     }
 
 
-
-  }, [slug]);
-
+  },[slug]);
 
 
 
 
 
-
-
-
-  if(loading) {
-
+  if(loading){
 
     return (
 
-      <main className="
-        max-w-3xl
-        mx-auto
-        px-6
-        py-16
-      ">
+      <main className="max-w-3xl mx-auto px-6 py-16">
 
         <p className="text-gray-500 text-center">
-
           Loading article...
-
         </p>
 
       </main>
 
     );
-
 
   }
 
@@ -222,48 +194,25 @@ export default function ArticlePage() {
 
 
 
-
-
-
-
-
-  if(!article) {
-
+  if(!article){
 
     return (
 
-      <main className="
-        max-w-3xl
-        mx-auto
-        px-6
-        py-16
-        text-center
-      ">
-
+      <main className="max-w-3xl mx-auto px-6 py-16 text-center">
 
         <h1 className="text-2xl font-bold">
-
           Article not found
-
         </h1>
 
-
-
         <p className="text-gray-500 mt-2">
-
           This article may have been deleted or moved.
-
         </p>
-
 
       </main>
 
     );
 
-
   }
-
-
 
 
 
@@ -282,155 +231,75 @@ export default function ArticlePage() {
 
 
 
-
-
-
-
-
   return (
 
-    <main className="
-      max-w-3xl
-      mx-auto
-      px-4
-      sm:px-6
-      py-10
-    ">
+    <main className="max-w-3xl mx-auto px-4 sm:px-6 py-10">
 
 
-
-
-
-      <p className="
-        text-sm
-        uppercase
-        text-gray-500
-      ">
-
+      <p className="text-sm uppercase text-gray-500">
         {article.category}
-
       </p>
 
 
 
 
-
-
-
-
-      <h1 className="
-        text-3xl
-        sm:text-5xl
-        font-bold
-        mt-3
-      ">
-
+      <h1 className="text-3xl sm:text-5xl font-bold mt-3">
         {article.title}
-
       </h1>
 
 
 
 
-
-
-
-
-      <div className="
-        text-sm
-        text-gray-500
-        mt-4
-        flex
-        flex-wrap
-        gap-2
-        items-center
-      ">
+      <div className="text-sm text-gray-500 mt-4 flex flex-wrap gap-2">
 
 
         <span>
 
           By{" "}
 
-
           {article.author ? (
 
             <Link
-
               href={`/author/${article.author._id}`}
-
-              className="
-                underline
-                hover:text-black
-              "
-
+              className="underline hover:text-black"
             >
 
               {article.author.firstName}{" "}
-
               {article.author.lastName}
-
 
             </Link>
 
-
           ) : (
-
             "Unknown"
-
           )}
 
-
         </span>
-
-
 
 
 
         <span>•</span>
 
 
-
-
         <span>
-
-          {new Date(
-            article.createdAt
-          ).toLocaleDateString()}
-
+          {new Date(article.createdAt)
+            .toLocaleDateString()}
         </span>
-
-
-
 
 
         <span>•</span>
 
 
-
-
-
         <span>
-
           {article.views || 0} views
-
         </span>
-
-
-
 
 
         <span>•</span>
 
 
-
-
-
         <span>
-
           {readingTime} min read
-
         </span>
-
 
 
       </div>
@@ -439,31 +308,20 @@ export default function ArticlePage() {
 
 
 
-
-
-
-
       {article.coverImage && (
 
-
         <img
-
           src={article.coverImage}
-
           alt={article.title}
-
           loading="lazy"
-
           className="
-            w-full
-            mt-8
-            rounded-xl
-            max-h-[450px]
-            object-cover
+          w-full
+          mt-8
+          rounded-xl
+          max-h-[450px]
+          object-cover
           "
-
         />
-
 
       )}
 
@@ -472,15 +330,7 @@ export default function ArticlePage() {
 
 
 
-
-
-
-      <p className="
-        mt-8
-        text-lg
-        text-gray-700
-        leading-relaxed
-      ">
+      <p className="mt-8 text-lg text-gray-700 leading-relaxed">
 
         {article.excerpt}
 
@@ -490,16 +340,7 @@ export default function ArticlePage() {
 
 
 
-
-
-
-
-      <div className="
-        mt-8
-        text-lg
-        leading-8
-        whitespace-pre-line
-      ">
+      <div className="mt-8 text-lg leading-8 whitespace-pre-line">
 
         {article.content}
 
@@ -510,41 +351,21 @@ export default function ArticlePage() {
 
 
 
-
-
-
       {related.length > 0 && (
 
-
-        <section className="
-          mt-12
-          border-t
-          pt-8
-        ">
+        <section className="mt-12 border-t pt-8">
 
 
-          <h2 className="
-            text-xl
-            font-bold
-            mb-5
-          ">
-
+          <h2 className="text-xl font-bold mb-5">
             Related Articles
-
           </h2>
-
-
-
-
 
 
 
           <div className="grid gap-4">
 
 
-
-            {related.map((item) => (
-
+            {related.map((item)=>(
 
               <Link
 
@@ -553,52 +374,35 @@ export default function ArticlePage() {
                 href={`/articles/${item.slug}`}
 
                 className="
-                  border
-                  rounded-lg
-                  p-4
-                  hover:shadow
+                border
+                rounded-lg
+                p-4
+                hover:shadow
                 "
 
               >
 
-
-
                 <h3 className="font-semibold">
-
                   {item.title}
-
                 </h3>
 
 
-
-
-
                 <p className="text-sm text-gray-500">
-
                   {item.excerpt}
-
                 </p>
-
 
 
               </Link>
 
-
             ))}
-
 
 
           </div>
 
 
-
         </section>
 
-
       )}
-
-
-
 
 
     </main>
