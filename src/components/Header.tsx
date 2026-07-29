@@ -8,382 +8,416 @@ import { useSession, signOut } from "next-auth/react";
 export default function Header() {
 
 
-  const {
-    data: session,
-  } = useSession();
+  const { data: session } =
+    useSession();
 
 
-  const [open, setOpen] = useState(false);
+  const [open,setOpen] =
+    useState(false);
+
+
+  const [mobile,setMobile] =
+    useState(false);
 
 
 
-  const fullName =
+  const name =
     session?.user?.name || "";
 
 
-
-  const names =
-    fullName.split(" ");
-
-
-
-  const firstName =
-    names[0] || "";
-
+  const parts =
+    name.split(" ");
 
 
   const initials =
     (
-      (names[0]?.charAt(0) || "") +
-      (names[1]?.charAt(0) || "")
+      (parts[0]?.[0] || "") +
+      (parts[1]?.[0] || "")
     ).toUpperCase();
+
 
 
 
 
   return (
 
-    <header className="sticky top-0 bg-white border-b z-50">
+<header className="
+sticky
+top-0
+bg-white
+border-b
+z-50
+">
 
 
-      <div className="max-w-6xl mx-auto px-6 h-16 flex items-center justify-between">
+<div className="
+max-w-7xl
+mx-auto
+px-6
+h-16
+flex
+items-center
+justify-between
+">
 
 
 
-        <Link href="/home">
+<Link href="/home">
 
+<div>
 
-          <div>
+<h1 className="text-2xl font-bold">
+The Echo
+</h1>
 
-            <h1 className="text-2xl font-bold">
-              The Echo
-            </h1>
+<p className="text-xs text-gray-500">
+Echoing Reality of Thousands...
+</p>
 
+</div>
 
-            <p className="text-xs text-gray-500">
-              Echoing Reality of Thousands...
-            </p>
+</Link>
 
 
-          </div>
 
 
-        </Link>
 
+<button
 
+className="
+md:hidden
+text-2xl
+"
 
+onClick={()=>
+setMobile(!mobile)
+}
 
+>
 
-        <nav className="flex items-center gap-8 text-sm font-medium">
+☰
 
+</button>
 
 
-          <Link href="/home">
-            Home
-          </Link>
 
 
-          <Link href="/articles">
-            Articles
-          </Link>
 
 
-          <Link href="/dashboard">
-            Dashboard
-          </Link>
+<nav className={`
+${mobile ? "flex" : "hidden"}
+md:flex
+absolute
+md:static
+top-16
+left-0
+right-0
+bg-white
+md:bg-transparent
+border-b
+md:border-none
+flex-col
+md:flex-row
+items-center
+gap-6
+p-6
+md:p-0
+text-sm
+font-medium
+`}>
 
 
-          <Link href="/about">
-            About
-          </Link>
 
+<Link href="/home">
+Home
+</Link>
 
-          <Link href="/contact">
-            Contact
-          </Link>
 
+<Link href="/articles">
+Articles
+</Link>
 
 
 
 
-          {!session ? (
 
+{session && (
 
-            <Link
+<Link href="/dashboard">
+Dashboard
+</Link>
 
-              href="/auth"
+)}
 
-              className="
-              px-4
-              py-2
-              rounded-lg
-              bg-black
-              text-white
-              "
 
-            >
 
-              Login
+<Link href="/about">
+About
+</Link>
 
-            </Link>
 
+<Link href="/contact">
+Contact
+</Link>
 
 
-          ) : (
 
 
 
-            <div className="relative">
 
 
+{!session ? (
 
-              <button
 
+<>
 
-                onClick={() =>
-                  setOpen(!open)
-                }
 
+<Link
 
-                className="
-                flex
-                items-center
-                gap-3
-                "
+href="/auth"
 
+className="
+px-4
+py-2
+rounded-lg
+bg-black
+text-white
+"
 
-              >
+>
 
+Login
 
+</Link>
 
-                <div
 
-                  className="
-                  w-10
-                  h-10
-                  rounded-full
-                  bg-black
-                  text-white
-                  flex
-                  items-center
-                  justify-center
-                  font-bold
-                  overflow-hidden
-                  "
 
-                >
+<Link
 
+href="/auth/register"
 
+className="
+px-4
+py-2
+rounded-lg
+border
+"
 
-                  {session.user.image ? (
+>
 
+Sign Up
 
-                    <img
+</Link>
 
-                      src={session.user.image}
 
-                      alt="Profile"
+</>
 
-                      className="
-                      w-full
-                      h-full
-                      object-cover
-                      "
 
-                    />
 
+) : (
 
-                  ) : (
 
 
-                    initials || "U"
+<div className="relative">
 
 
-                  )}
+<button
 
+onClick={()=>
+setOpen(!open)
+}
 
+className="
+flex
+items-center
+gap-3
+"
 
-                </div>
+>
 
 
+<div className="
+w-10
+h-10
+rounded-full
+bg-black
+text-white
+flex
+items-center
+justify-center
+font-bold
+overflow-hidden
+">
 
 
+{session.user.image ? (
 
-                <span className="font-semibold">
+<img
 
+src={session.user.image}
 
-                  {firstName}
+alt="profile"
 
+className="
+w-full
+h-full
+object-cover
+"
 
-                </span>
+/>
 
+):(
 
 
+initials || "U"
 
 
-                <span>
+)}
 
-                  ▼
 
-                </span>
+</div>
 
 
 
-              </button>
+<span className="font-semibold">
 
+{parts[0]}
 
+</span>
 
 
 
+<span>
+▼
+</span>
 
-              {open && (
 
+</button>
 
 
-                <div
 
-                  className="
-                  absolute
-                  right-0
-                  mt-3
-                  w-56
-                  bg-white
-                  border
-                  rounded-xl
-                  shadow-lg
-                  overflow-hidden
-                  "
 
-                >
 
+{open && (
 
 
-                  <div className="px-4 py-3 border-b">
+<div className="
+absolute
+right-0
+mt-3
+w-60
+bg-white
+border
+rounded-xl
+shadow-lg
+overflow-hidden
+">
 
 
-                    <p className="font-semibold">
+<div className="
+p-4
+border-b
+">
 
-                      {session.user.name}
 
-                    </p>
+<p className="font-semibold">
 
+{session.user.name}
 
-                    <p className="text-xs text-gray-500">
+</p>
 
-                      {session.user.email}
 
-                    </p>
+<p className="text-xs text-gray-500">
 
+{session.user.email}
 
-                    <p className="text-xs text-gray-400 capitalize mt-1">
+</p>
 
-                      {session.user.role}
 
-                    </p>
+<p className="text-xs text-gray-400 capitalize">
 
+{session.user.role}
 
-                  </div>
+</p>
 
 
+</div>
 
 
 
 
-                  <Link
 
+<Link
 
-                    href="/profile"
+href="/profile"
 
+className="
+block
+px-4
+py-3
+hover:bg-gray-100
+"
 
-                    onClick={() =>
-                      setOpen(false)
-                    }
+>
 
+Edit Profile
 
-                    className="
-                    flex
-                    items-center
-                    gap-2
-                    px-4
-                    py-3
-                    hover:bg-gray-100
-                    "
+</Link>
 
 
-                  >
 
-                    Edit Profile
 
-                  </Link>
 
+<button
 
+onClick={()=>
+signOut({
+callbackUrl:"/home"
+})
+}
 
+className="
+w-full
+text-left
+px-4
+py-3
+text-red-600
+hover:bg-red-50
+"
 
+>
 
+Logout
 
+</button>
 
-                  <button
 
+</div>
 
-                    onClick={() =>
-                      signOut({
 
-                        callbackUrl:"/home",
+)}
 
-                      })
-                    }
 
 
-                    className="
-                    w-full
-                    text-left
-                    flex
-                    items-center
-                    gap-2
-                    px-4
-                    py-3
-                    hover:bg-red-50
-                    text-red-600
-                    "
+</div>
 
 
-                  >
 
-                    Logout
+)}
 
-                  </button>
 
 
 
+</nav>
 
 
-                </div>
 
+</div>
 
 
-              )}
-
-
-
-            </div>
-
-
-
-          )}
-
-
-
-        </nav>
-
-
-
-      </div>
-
-
-    </header>
+</header>
 
 
   );
-
 
 }
