@@ -45,6 +45,7 @@ type Article = {
 
 
 
+
 export default function ArticlePage() {
 
 
@@ -66,19 +67,17 @@ export default function ArticlePage() {
 
 
 
-  useEffect(()=>{
+  useEffect(() => {
 
 
-    async function loadArticle(){
+    async function loadArticle() {
 
 
       try {
 
 
         const response =
-          await fetch(
-            "/api/articles"
-          );
+          await fetch("/api/articles");
 
 
         const data =
@@ -89,22 +88,48 @@ export default function ArticlePage() {
 
         const found =
           data.find(
-            (item:Article)=>
+            (item: Article) =>
               item.slug === slug
           );
 
 
 
-        if(found){
+
+
+        if (found) {
+
+
+          // Increase views
+          const viewResponse =
+            await fetch(
+              `/api/articles/${found._id}/views`,
+              {
+                method: "PUT",
+              }
+            );
+
+
+          const viewData =
+            await viewResponse.json();
+
+
+
+          found.views =
+            viewData.views;
+
+
 
 
           setArticle(found);
 
 
 
+
+
+
           const relatedArticles =
             data.filter(
-              (item:Article)=>
+              (item: Article) =>
 
                 item.category === found.category &&
 
@@ -113,24 +138,29 @@ export default function ArticlePage() {
                 item.status === "published"
 
             )
-            .slice(0,4);
+            .slice(0, 4);
+
 
 
 
           setRelated(relatedArticles);
 
 
+
         }
 
 
 
-      }catch(error){
+      } catch(error) {
 
 
-        console.error(error);
+        console.error(
+          "Failed loading article",
+          error
+        );
 
 
-      }finally{
+      } finally {
 
 
         setLoading(false);
@@ -143,14 +173,17 @@ export default function ArticlePage() {
 
 
 
-    if(slug){
+
+
+    if(slug) {
 
       loadArticle();
 
     }
 
 
-  },[slug]);
+
+  }, [slug]);
 
 
 
@@ -158,7 +191,9 @@ export default function ArticlePage() {
 
 
 
-  if(loading){
+
+
+  if(loading) {
 
 
     return (
@@ -189,7 +224,10 @@ export default function ArticlePage() {
 
 
 
-  if(!article){
+
+
+
+  if(!article) {
 
 
     return (
@@ -246,6 +284,9 @@ export default function ArticlePage() {
 
 
 
+
+
+
   return (
 
     <main className="
@@ -276,6 +317,7 @@ export default function ArticlePage() {
 
 
 
+
       <h1 className="
         text-3xl
         sm:text-5xl
@@ -286,6 +328,7 @@ export default function ArticlePage() {
         {article.title}
 
       </h1>
+
 
 
 
@@ -316,8 +359,8 @@ export default function ArticlePage() {
               href={`/author/${article.author._id}`}
 
               className="
-              underline
-              hover:text-black
+                underline
+                hover:text-black
               "
 
             >
@@ -342,7 +385,9 @@ export default function ArticlePage() {
 
 
 
+
         <span>•</span>
+
 
 
 
@@ -357,7 +402,10 @@ export default function ArticlePage() {
 
 
 
+
         <span>•</span>
+
+
 
 
 
@@ -369,7 +417,11 @@ export default function ArticlePage() {
 
 
 
+
+
         <span>•</span>
+
+
 
 
 
@@ -390,6 +442,7 @@ export default function ArticlePage() {
 
 
 
+
       {article.coverImage && (
 
 
@@ -402,11 +455,11 @@ export default function ArticlePage() {
           loading="lazy"
 
           className="
-          w-full
-          mt-8
-          rounded-xl
-          max-h-[450px]
-          object-cover
+            w-full
+            mt-8
+            rounded-xl
+            max-h-[450px]
+            object-cover
           "
 
         />
@@ -432,6 +485,7 @@ export default function ArticlePage() {
         {article.excerpt}
 
       </p>
+
 
 
 
@@ -484,11 +538,12 @@ export default function ArticlePage() {
 
 
 
+
           <div className="grid gap-4">
 
 
 
-            {related.map((item)=>(
+            {related.map((item) => (
 
 
               <Link
@@ -498,10 +553,10 @@ export default function ArticlePage() {
                 href={`/articles/${item.slug}`}
 
                 className="
-                border
-                rounded-lg
-                p-4
-                hover:shadow
+                  border
+                  rounded-lg
+                  p-4
+                  hover:shadow
                 "
 
               >
@@ -513,6 +568,7 @@ export default function ArticlePage() {
                   {item.title}
 
                 </h3>
+
 
 
 
@@ -540,6 +596,7 @@ export default function ArticlePage() {
 
 
       )}
+
 
 
 
