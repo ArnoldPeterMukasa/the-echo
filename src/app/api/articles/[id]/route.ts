@@ -1,16 +1,22 @@
 import { NextResponse } from "next/server";
+
 import { connectDB } from "@/src/lib/mongodb";
 import Article from "@/src/models/Article";
 
 
+
 export async function PUT(
+
   request: Request,
+
   context: {
     params: Promise<{
       id: string;
     }>;
   }
+
 ) {
+
 
   try {
 
@@ -18,44 +24,56 @@ export async function PUT(
     await connectDB();
 
 
+
     const { id } = await context.params;
+
 
 
     const body = await request.json();
 
 
 
-    const article = await Article.findByIdAndUpdate(
+    const article =
+      await Article.findByIdAndUpdate(
 
-      id,
+        id,
 
-      {
-        status: body.status,
-      },
+        {
 
-      {
-        new: true,
-      }
+          status: body.status,
 
-    );
+        },
+
+        {
+
+          new: true,
+
+        }
+
+      );
+
 
 
 
     if (!article) {
 
+
       return NextResponse.json(
 
         {
-          message: "Article not found",
+          message:
+            "Article not found",
         },
 
         {
-          status: 404,
+          status:404,
         }
 
       );
 
+
     }
+
 
 
 
@@ -73,7 +91,8 @@ export async function PUT(
     return NextResponse.json(
 
       {
-        message:"Server error",
+        message:
+          "Server error",
       },
 
       {
@@ -84,5 +103,106 @@ export async function PUT(
 
 
   }
+
+
+}
+
+
+
+
+
+
+
+
+export async function DELETE(
+
+  request: Request,
+
+  context: {
+    params: Promise<{
+      id: string;
+    }>;
+  }
+
+) {
+
+
+  try {
+
+
+    await connectDB();
+
+
+
+    const { id } =
+      await context.params;
+
+
+
+
+    const article =
+      await Article.findByIdAndDelete(id);
+
+
+
+
+
+    if(!article){
+
+
+      return NextResponse.json(
+
+        {
+          message:
+            "Article not found",
+        },
+
+        {
+          status:404,
+        }
+
+      );
+
+
+    }
+
+
+
+
+    return NextResponse.json(
+
+      {
+        message:
+          "Article deleted successfully",
+      }
+
+    );
+
+
+
+
+  } catch(error){
+
+
+    console.error(error);
+
+
+
+    return NextResponse.json(
+
+      {
+        message:
+          "Server error",
+      },
+
+      {
+        status:500,
+      }
+
+    );
+
+
+  }
+
 
 }
