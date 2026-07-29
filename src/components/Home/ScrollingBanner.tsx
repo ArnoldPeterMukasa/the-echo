@@ -1,62 +1,68 @@
 "use client";
 
-export default function ScrollingBanner() {
+import { useEffect, useState } from "react";
 
-  const headlines = [
-    "THE ECHO Magazine launches new issue",
-    "Breaking: New featured stories available",
-    "Read exclusive interviews from our writers",
-    "Submit your article for review today",
-    "Discover trending stories",
+type Advertisement = {
+  _id: string;
+  title: string;
+};
+
+export default function ScrollingBanner() {
+  const [ads, setAds] = useState<Advertisement[]>([]);
+
+  useEffect(() => {
+    async function loadAds() {
+      try {
+        const response = await fetch("/api/advertisements");
+
+        if (response.ok) {
+          const data = await response.json();
+          setAds(data);
+        }
+      } catch (error) {
+        console.error(error);
+      }
+    }
+
+    loadAds();
+  }, []);
+
+  const defaults = [
+    "📰 THE ECHO Magazine launches new issue",
+    "🔥 Breaking: New featured stories available",
+    "🎙️ Read exclusive interviews",
+    "✍️ Submit your article today",
   ];
 
+  const headlines =
+    ads.length > 0
+      ? ads.map((ad) => ad.title)
+      : defaults;
 
   return (
     <section className="w-full overflow-hidden rounded-xl border bg-black text-white flex">
 
-      {/* STATIC BRAND BOX */}
-      <div className="
-        bg-yellow-400
-        text-black
-        px-5
-        py-3
-        font-extrabold
-        tracking-wide
-        flex
-        items-center
-        z-10
-      ">
+      <div className="bg-yellow-400 text-black px-5 py-3 font-bold shrink-0">
         THE ECHO
       </div>
 
+      <div className="relative overflow-hidden flex-1">
 
-      {/* MOVING HEADLINES */}
-      <div className="overflow-hidden flex-1"> //relative to be added at the end...
+        <div className="flex whitespace-nowrap animate-scroll py-3">
 
-        <div className="
-        flex 
-        whitespace-nowrap 
-        animate-scroll 
-        py-3
-      ">
-
-          {headlines.map((headline, index) => (
-
+          {[...headlines, ...headlines].map((headline, index) => (
             <span
               key={index}
-              className="mx-8 text-sm sm:text-base"
+              className="mx-8"
             >
               {headline}
             </span>
-
           ))}
 
         </div>
 
       </div>
 
-
     </section>
-
-);
+  );
 }
