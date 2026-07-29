@@ -1,34 +1,48 @@
 "use client";
 
 import { useSession } from "next-auth/react";
-import { useState, useEffect } from "react";
+import { useEffect, useState } from "react";
 
 
 export default function ProfilePage() {
 
 
-  const { data: session } = useSession();
+  const { data: session } =
+    useSession();
 
 
-  const [firstName, setFirstName] = useState("");
 
-  const [lastName, setLastName] = useState("");
+  const [firstName,setFirstName] =
+    useState("");
 
-  const [bio, setBio] = useState("");
+  const [lastName,setLastName] =
+    useState("");
 
-  const [image, setImage] = useState("");
+  const [bio,setBio] =
+    useState("");
 
-  const [currentPassword, setCurrentPassword] = useState("");
+  const [image,setImage] =
+    useState("");
 
-  const [newPassword, setNewPassword] = useState("");
 
-  const [confirmPassword, setConfirmPassword] = useState("");
 
-  const [saving, setSaving] = useState(false);
+  const [currentPassword,setCurrentPassword] =
+    useState("");
 
-  const [uploading, setUploading] = useState(false);
+  const [newPassword,setNewPassword] =
+    useState("");
 
-  const [message, setMessage] = useState("");
+  const [confirmPassword,setConfirmPassword] =
+    useState("");
+
+
+
+  const [saving,setSaving] =
+    useState(false);
+
+
+  const [message,setMessage] =
+    useState("");
 
 
 
@@ -39,37 +53,26 @@ export default function ProfilePage() {
     async function loadProfile(){
 
 
-      const res =
+      const response =
         await fetch("/api/profile");
 
 
-
-      if(res.ok){
+      if(response.ok){
 
 
         const user =
-          await res.json();
+          await response.json();
 
 
 
-        setFirstName(
-          user.firstName || ""
-        );
+        setFirstName(user.firstName || "");
 
+        setLastName(user.lastName || "");
 
-        setLastName(
-          user.lastName || ""
-        );
+        setBio(user.bio || "");
 
+        setImage(user.image || "");
 
-        setBio(
-          user.bio || ""
-        );
-
-
-        setImage(
-          user.image || ""
-        );
 
       }
 
@@ -92,132 +95,55 @@ export default function ProfilePage() {
 
 
 
-  async function uploadPhoto(
-    e: React.ChangeEvent<HTMLInputElement>
-  ){
 
+  function passwordStrength(password:string){
 
-    const file =
-      e.target.files?.[0];
 
+    let score = 0;
 
-    if(!file) return;
 
+    if(password.length >= 8)
+      score++;
 
 
-    setUploading(true);
+    if(/[a-z]/.test(password))
+      score++;
 
 
+    if(/[A-Z]/.test(password))
+      score++;
 
-    try {
 
+    if(/[0-9]/.test(password))
+      score++;
 
-      const formData =
-        new FormData();
 
 
-
-      formData.append(
-        "file",
-        file
-      );
-
-
-
-      formData.append(
-
-        "upload_preset",
-
-        process.env
-          .NEXT_PUBLIC_CLOUDINARY_UPLOAD_PRESET!
-
-      );
-
-
-
-      const upload =
-        await fetch(
-
-          `https://api.cloudinary.com/v1_1/${process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME}/image/upload`,
-
-          {
-            method:"POST",
-            body:formData,
-          }
-
-        );
-
-
-
-      const data =
-        await upload.json();
-
-
-
-      const imageUrl =
-        data.secure_url;
-
-
-
-      setImage(imageUrl);
-
-
-
-      await fetch(
-
-        "/api/upload/avatar",
-
-        {
-
-          method:"POST",
-
-          headers:{
-
-            "Content-Type":
-              "application/json",
-
-          },
-
-          body:JSON.stringify({
-
-            image:imageUrl,
-
-            email:
-              session?.user?.email,
-
-          }),
-
-        }
-
-      );
-
-
-
-      setMessage(
-        "Profile photo updated"
-      );
-
-
-
-    }catch(error){
-
-
-      console.error(error);
-
-
-      setMessage(
-        "Photo upload failed"
-      );
-
-
-    }
-
-
-
-    setUploading(false);
-
+    return score;
 
   }
+
+
+
+
+
+
+  const strength =
+    passwordStrength(newPassword);
+
+
+
+  const strengthText =
+    strength === 0
+      ? ""
+      : strength === 1
+      ? "Weak"
+      : strength === 2
+      ? "Medium"
+      : strength === 3
+      ? "Strong"
+      : "Very Strong";
+
 
 
 
@@ -234,24 +160,62 @@ export default function ProfilePage() {
 
 
 
+    if(newPassword){
+
+
+      if(newPassword !== confirmPassword){
+
+
+        setMessage(
+          "Passwords do not match"
+        );
+
+
+        setSaving(false);
+
+        return;
+
+      }
+
+
+
+      if(strength < 4){
+
+
+        setMessage(
+          "Password must contain 8+ characters, uppercase, lowercase and number"
+        );
+
+
+        setSaving(false);
+
+        return;
+
+      }
+
+
+    }
+
+
+
+
+
+
     try {
 
 
       const response =
         await fetch(
-
           "/api/profile",
-
           {
 
             method:"PUT",
 
             headers:{
-
               "Content-Type":
-                "application/json",
-
+              "application/json",
             },
+
 
             body:JSON.stringify({
 
@@ -261,11 +225,22 @@ export default function ProfilePage() {
 
               bio,
 
+              image,
+
+              currentPassword,
+
+              newPassword,
+
             }),
 
           }
-
         );
+
+
+
+      const data =
+        await response.json();
+
 
 
 
@@ -277,10 +252,19 @@ export default function ProfilePage() {
         );
 
 
+        setCurrentPassword("");
+
+        setNewPassword("");
+
+        setConfirmPassword("");
+
+
+
       }else{
 
 
         setMessage(
+          data.message ||
           "Update failed"
         );
 
@@ -289,7 +273,7 @@ export default function ProfilePage() {
 
 
 
-    }catch{
+    }catch(error){
 
 
       setMessage(
@@ -313,9 +297,9 @@ export default function ProfilePage() {
 
   const initials = (
 
-    (firstName.charAt(0) || "") +
+    firstName.charAt(0) +
 
-    (lastName.charAt(0) || "")
+    lastName.charAt(0)
 
   ).toUpperCase();
 
@@ -327,10 +311,19 @@ export default function ProfilePage() {
 
   return (
 
-    <main className="max-w-3xl mx-auto px-6 py-10">
+    <main className="
+      max-w-3xl
+      mx-auto
+      px-6
+      py-10
+    ">
 
 
-      <h1 className="text-4xl font-bold mb-10">
+      <h1 className="
+        text-4xl
+        font-bold
+        mb-10
+      ">
 
         Edit Profile
 
@@ -339,19 +332,28 @@ export default function ProfilePage() {
 
 
 
-      <div className="bg-white border rounded-2xl p-8 shadow-sm">
+
+      <div className="
+        bg-white
+        border
+        rounded-2xl
+        p-8
+        shadow-sm
+      ">
 
 
 
 
 
-        <div className="flex flex-col items-center mb-10">
+        <div className="
+          flex
+          flex-col
+          items-center
+          mb-10
+        ">
 
 
-
-          <div
-
-            className="
+          <div className="
             w-28
             h-28
             rounded-full
@@ -363,9 +365,7 @@ export default function ProfilePage() {
             text-4xl
             font-bold
             overflow-hidden
-            "
-
-          >
+          ">
 
 
             {image ? (
@@ -384,7 +384,6 @@ export default function ProfilePage() {
 
               />
 
-
             ) : (
 
               initials || "U"
@@ -396,46 +395,6 @@ export default function ProfilePage() {
           </div>
 
 
-
-
-
-          <label
-
-            className="
-            mt-4
-            border
-            rounded-lg
-            px-4
-            py-2
-            cursor-pointer
-            "
-
-          >
-
-            {uploading
-              ? "Uploading..."
-              : "Change Photo"
-            }
-
-
-
-            <input
-
-              type="file"
-
-              accept="image/*"
-
-              hidden
-
-              onChange={uploadPhoto}
-
-            />
-
-
-          </label>
-
-
-
         </div>
 
 
@@ -444,108 +403,45 @@ export default function ProfilePage() {
 
 
 
-        <div className="grid md:grid-cols-2 gap-6">
+
+        <div className="
+          grid
+          md:grid-cols-2
+          gap-6
+        ">
 
 
+          <input
 
-          <div>
-
-            <label className="block mb-2 font-medium">
-
-              First Name
-
-            </label>
-
-
-            <input
-
-              value={firstName}
-
-              onChange={(e)=>
-                setFirstName(e.target.value)
-              }
-
-              className="
-              w-full
-              border
-              rounded-xl
-              p-3
-              "
-
-            />
-
-
-          </div>
-
-
-
-
-
-          <div>
-
-
-            <label className="block mb-2 font-medium">
-
-              Last Name
-
-            </label>
-
-
-
-            <input
-
-              value={lastName}
-
-              onChange={(e)=>
-                setLastName(e.target.value)
-              }
-
-
-              className="
-              w-full
-              border
-              rounded-xl
-              p-3
-              "
-
-            />
-
-
-          </div>
-
-
-        </div>
-
-
-
-
-
-
-
-        <div className="mt-6">
-
-
-          <label className="block mb-2 font-medium">
-
-            Bio
-
-          </label>
-
-
-
-          <textarea
-
-            rows={5}
-
-            value={bio}
+            value={firstName}
 
             onChange={(e)=>
-              setBio(e.target.value)
+              setFirstName(e.target.value)
             }
 
+            placeholder="First Name"
 
             className="
-            w-full
+            border
+            rounded-xl
+            p-3
+            "
+
+          />
+
+
+
+          <input
+
+            value={lastName}
+
+            onChange={(e)=>
+              setLastName(e.target.value)
+            }
+
+            placeholder="Last Name"
+
+            className="
             border
             rounded-xl
             p-3
@@ -561,7 +457,43 @@ export default function ProfilePage() {
 
 
 
-        <h2 className="text-2xl font-bold mt-10 mb-6">
+
+        <textarea
+
+          value={bio}
+
+          onChange={(e)=>
+            setBio(e.target.value)
+          }
+
+          placeholder="Bio"
+
+          rows={5}
+
+          className="
+          w-full
+          border
+          rounded-xl
+          p-3
+          mt-6
+          "
+
+        />
+
+
+
+
+
+
+
+
+
+        <h2 className="
+          text-2xl
+          font-bold
+          mt-10
+          mb-5
+        ">
 
           Change Password
 
@@ -571,9 +503,7 @@ export default function ProfilePage() {
 
 
 
-
-        <div className="space-y-5">
-
+        <div className="space-y-4">
 
 
           <input
@@ -587,7 +517,6 @@ export default function ProfilePage() {
             onChange={(e)=>
               setCurrentPassword(e.target.value)
             }
-
 
             className="
             w-full
@@ -614,7 +543,6 @@ export default function ProfilePage() {
               setNewPassword(e.target.value)
             }
 
-
             className="
             w-full
             border
@@ -623,6 +551,64 @@ export default function ProfilePage() {
             "
 
           />
+
+
+
+
+
+
+          {newPassword && (
+
+            <div>
+
+
+              <div className="
+                flex
+                gap-2
+                mt-3
+              ">
+
+
+                {[1,2,3,4].map((bar)=>(
+
+                  <div
+
+                    key={bar}
+
+                    className={`
+                      h-2
+                      flex-1
+                      rounded
+                      ${
+                        strength >= bar
+                        ? "bg-black"
+                        : "bg-gray-200"
+                      }
+                    `}
+
+                  />
+
+                ))}
+
+
+              </div>
+
+
+              <p className="
+                text-sm
+                mt-2
+              ">
+
+                {strengthText}
+
+              </p>
+
+
+
+            </div>
+
+          )}
+
 
 
 
@@ -640,7 +626,6 @@ export default function ProfilePage() {
               setConfirmPassword(e.target.value)
             }
 
-
             className="
             w-full
             border
@@ -649,7 +634,6 @@ export default function ProfilePage() {
             "
 
           />
-
 
 
         </div>
@@ -662,34 +646,26 @@ export default function ProfilePage() {
 
         <button
 
+          onClick={saveProfile}
 
           disabled={saving}
 
-
-          onClick={saveProfile}
-
-
-
           className="
-          mt-10
+          mt-8
           bg-black
           text-white
           px-8
           py-3
           rounded-xl
-          font-semibold
           disabled:opacity-50
           "
 
-
         >
-
 
           {saving
             ? "Saving..."
             : "Save Changes"
           }
-
 
         </button>
 
@@ -698,19 +674,20 @@ export default function ProfilePage() {
 
 
 
+
         {message && (
 
-
-          <p className="mt-4 text-sm text-gray-600">
+          <p className="
+            mt-4
+            text-sm
+            text-gray-600
+          ">
 
             {message}
 
           </p>
 
-
         )}
-
-
 
 
 
