@@ -1,75 +1,165 @@
 "use client";
 
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useParams } from "next/navigation";
 import Link from "next/link";
-import { useArticleStore } from "@/src/store/articleStore";
+
+
+type Article = {
+
+  _id: string;
+
+  title: string;
+
+  slug: string;
+
+  summary: string;
+
+  content: string;
+
+  category: string;
+
+  coverImage?: string;
+
+  views?: number;
+
+  status?: string;
+
+  createdAt: string;
+
+  author?: {
+
+    _id: string;
+
+    firstName: string;
+
+    lastName: string;
+
+    image?: string;
+
+  };
+
+};
+
+
+
 
 export default function ArticlePage() {
 
+
   const { slug } = useParams();
 
-  const {
-    articles,
-    hydrate,
-    incrementViews,
-  } = useArticleStore();
+
+  const [article, setArticle] = useState<Article | null>(null);
+
+  const [related, setRelated] = useState<Article[]>([]);
+
+  const [loading, setLoading] = useState(true);
 
 
 
-  // Load articles from storage
-  useEffect(() => {
-    hydrate();
-  }, [hydrate]);
+
+  useEffect(()=>{
+
+
+    async function loadArticle(){
+
+
+      try {
+
+
+        const response =
+          await fetch(
+            "/api/articles"
+          );
+
+
+        const data =
+          await response.json();
 
 
 
-  const article = articles.find(
-    (a) => a.slug === slug
-  );
+        const found =
+          data.find(
+            (item: Article)=>
+              item.slug === slug
+          );
 
 
 
-  // count views once
-  useEffect(() => {
-
-    if (article?.id) {
-
-      const viewed =
-        sessionStorage.getItem(
-          `viewed-${article.id}`
-        );
+        if(found){
 
 
-      if (!viewed) {
+          setArticle(found);
 
-        incrementViews(article.id);
 
-        sessionStorage.setItem(
-          `viewed-${article.id}`,
-          "true"
-        );
+
+          const relatedArticles =
+            data
+            .filter(
+              (item: Article)=>
+                item.category === found.category &&
+                item.slug !== found.slug &&
+                item.status === "published"
+            )
+            .slice(0,4);
+
+
+
+          setRelated(relatedArticles);
+
+
+
+        }
+
+
+
+      } catch(error){
+
+
+        console.error(error);
+
+
+      } finally {
+
+
+        setLoading(false);
+
 
       }
 
+
     }
 
-  }, [article?.id]);
+
+
+    if(slug){
+
+      loadArticle();
+
+    }
 
 
 
-  if (!article) {
+  },[slug]);
+
+
+
+
+
+
+
+  if(loading){
+
 
     return (
 
-      <main className="max-w-3xl mx-auto px-6 py-16 text-center">
+      <main className="max-w-3xl mx-auto px-6 py-16">
 
-        <h1 className="text-2xl font-bold">
-          Article not found
-        </h1>
+        <p className="text-gray-500">
 
-        <p className="text-gray-500 mt-2">
-          This article may have been deleted or moved.
+          Loading article...
+
         </p>
 
       </main>
@@ -80,24 +170,55 @@ export default function ArticlePage() {
 
 
 
+
+
+
+  if(!article){
+
+
+    return (
+
+      <main className="max-w-3xl mx-auto px-6 py-16 text-center">
+
+
+        <h1 className="text-2xl font-bold">
+
+          Article not found
+
+        </h1>
+
+
+
+        <p className="text-gray-500 mt-2">
+
+          This article may have been deleted or moved.
+
+        </p>
+
+
+
+      </main>
+
+    );
+
+
+  }
+
+
+
+
+
   const words =
     article.content?.split(" ").length || 0;
 
 
   const readingTime =
-    Math.max(1, Math.ceil(words / 200));
+    Math.max(
+      1,
+      Math.ceil(words / 200)
+    );
 
 
-
-  const related = articles
-    .filter(
-      (a) =>
-        a.status === "published" &&
-        a.id !== article.id &&
-        a.category?.toLowerCase() ===
-        article.category?.toLowerCase()
-    )
-    .slice(0,4);
 
 
 
@@ -106,15 +227,24 @@ export default function ArticlePage() {
     <main className="max-w-3xl mx-auto px-4 sm:px-6 py-10">
 
 
+
       <p className="text-sm uppercase text-gray-500">
+
         {article.category}
+
       </p>
 
 
 
+
+
       <h1 className="text-3xl sm:text-5xl font-bold mt-3">
+
         {article.title}
+
       </h1>
+
+
 
 
 
@@ -126,35 +256,68 @@ export default function ArticlePage() {
 
           By{" "}
 
-          <Link
-            href={`/author/${encodeURIComponent(article.author)}`}
-            className="underline hover:text-black"
-          >
-            {article.author}
-          </Link>
+          {article.author ? (
+
+            <Link
+
+              href={`/author/${article.author._id}`}
+
+              className="underline hover:text-black"
+
+            >
+
+              {article.author.firstName}{" "}
+              {article.author.lastName}
+
+            </Link>
+
+
+          ) : (
+
+            "Unknown"
+
+          )}
 
         </span>
 
 
+
         <span>•</span>
 
+
+
         <span>
-          {article.createdAt}
+
+          {new Date(
+            article.createdAt
+          ).toLocaleDateString()}
+
         </span>
 
 
+
         <span>•</span>
 
+
+
         <span>
+
           {article.views || 0} views
+
         </span>
+
 
 
         <span>•</span>
 
+
+
         <span>
+
           {readingTime} min read
+
         </span>
+
 
 
       </div>
@@ -162,16 +325,33 @@ export default function ArticlePage() {
 
 
 
+
+
+
       {article.coverImage && (
 
+
         <img
+
           src={article.coverImage}
+
           alt={article.title}
+
           loading="lazy"
-          className="w-full mt-8 rounded-xl max-h-[450px] object-cover"
+
+          className="
+          w-full
+          mt-8
+          rounded-xl
+          max-h-[450px]
+          object-cover
+          "
+
         />
 
+
       )}
+
 
 
 
@@ -187,6 +367,9 @@ export default function ArticlePage() {
 
 
 
+
+
+
       <div className="mt-8 text-lg leading-8 whitespace-pre-line">
 
         {article.content}
@@ -198,51 +381,77 @@ export default function ArticlePage() {
 
 
 
+
+
       {related.length > 0 && (
+
 
         <section className="mt-12 border-t pt-8">
 
 
+
           <h2 className="text-xl font-bold mb-5">
+
             Related Articles
+
           </h2>
+
+
 
 
 
           <div className="grid gap-4">
 
 
-            {related.map((item) => (
+
+            {related.map((item)=>(
+
 
               <Link
 
-                key={item.id}
+                key={item._id}
 
                 href={`/articles/${item.slug}`}
 
-                className="border rounded-lg p-4 hover:shadow"
+                className="
+                border
+                rounded-lg
+                p-4
+                hover:shadow
+                "
 
               >
 
+
                 <h3 className="font-semibold">
+
                   {item.title}
+
                 </h3>
 
 
+
+
                 <p className="text-sm text-gray-500">
+
                   {item.summary}
+
                 </p>
 
 
               </Link>
 
+
             ))}
+
 
 
           </div>
 
 
+
         </section>
+
 
       )}
 

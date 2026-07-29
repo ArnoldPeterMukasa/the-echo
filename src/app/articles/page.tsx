@@ -12,7 +12,7 @@ type Article = {
 
   slug: string;
 
-  summary: string;
+  excerpt: string;
 
   category: string;
 
@@ -20,7 +20,11 @@ type Article = {
 
   views?: number;
 
-  status: string;
+  status:
+    | "draft"
+    | "pending"
+    | "published";
+
 
   author?: {
 
@@ -36,12 +40,17 @@ type Article = {
 
 
 
+
+
 export default function ArticlesPage() {
 
 
-  const [articles, setArticles] = useState<Article[]>([]);
+  const [articles, setArticles] =
+    useState<Article[]>([]);
 
-  const [loading, setLoading] = useState(true);
+
+  const [loading, setLoading] =
+    useState(true);
 
 
 
@@ -110,22 +119,30 @@ export default function ArticlesPage() {
 
 
 
+
   if(loading){
 
 
     return (
 
-      <main className="max-w-6xl mx-auto px-6 py-10">
+      <main className="
+        max-w-6xl
+        mx-auto
+        px-6
+        py-16
+      ">
 
-        <p className="text-gray-500">
+        <p className="text-gray-500 text-center">
 
-          Loading articles...
+          Loading magazine articles...
 
         </p>
+
 
       </main>
 
     );
+
 
   }
 
@@ -133,13 +150,24 @@ export default function ArticlesPage() {
 
 
 
+
+
   return (
 
-    <main className="max-w-6xl mx-auto px-6 py-10">
+    <main className="
+      max-w-6xl
+      mx-auto
+      px-6
+      py-12
+    ">
 
 
 
-      <h1 className="text-4xl font-bold mb-8">
+      <h1 className="
+        text-4xl
+        font-bold
+        mb-10
+      ">
 
         Magazine Articles
 
@@ -149,14 +177,21 @@ export default function ArticlesPage() {
 
 
 
+
+
       {articles.length === 0 ? (
 
 
-        <p className="text-gray-500">
+        <div className="
+          text-center
+          py-16
+          text-gray-500
+        ">
 
           No published articles yet.
 
-        </p>
+
+        </div>
 
 
 
@@ -164,7 +199,14 @@ export default function ArticlesPage() {
 
 
 
-        <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
+        <div className="
+          grid
+          md:grid-cols-2
+          lg:grid-cols-3
+          gap-8
+        ">
+
+
 
 
 
@@ -177,23 +219,28 @@ export default function ArticlesPage() {
               key={article._id}
 
               className="
-              border
-              rounded-xl
-              overflow-hidden
-              hover:shadow-lg
-              transition
+                border
+                rounded-2xl
+                overflow-hidden
+                bg-white
+                hover:shadow-xl
+                transition
               "
 
             >
 
 
 
-              <Link href={`/articles/${article.slug}`}>
+
+              <Link
+                href={`/articles/${article.slug}`}
+              >
 
 
 
 
-                {article.coverImage && (
+
+                {article.coverImage ? (
 
 
                   <img
@@ -205,12 +252,29 @@ export default function ArticlesPage() {
                     loading="lazy"
 
                     className="
-                    w-full
-                    h-56
-                    object-cover
+                      w-full
+                      h-56
+                      object-cover
                     "
 
                   />
+
+
+                ) : (
+
+
+                  <div className="
+                    h-56
+                    bg-gray-100
+                    flex
+                    items-center
+                    justify-center
+                    text-gray-400
+                  ">
+
+                    No Image
+
+                  </div>
 
 
                 )}
@@ -220,11 +284,19 @@ export default function ArticlesPage() {
 
 
 
-                <div className="p-5">
+
+
+                <div className="p-6">
 
 
 
-                  <p className="text-xs uppercase text-gray-500">
+
+
+                  <p className="
+                    text-xs
+                    uppercase
+                    text-gray-500
+                  ">
 
                     {article.category}
 
@@ -234,7 +306,13 @@ export default function ArticlesPage() {
 
 
 
-                  <h2 className="text-xl font-bold mt-2">
+
+
+                  <h2 className="
+                    text-xl
+                    font-bold
+                    mt-2
+                  ">
 
                     {article.title}
 
@@ -244,9 +322,15 @@ export default function ArticlesPage() {
 
 
 
-                  <p className="text-gray-600 mt-3 line-clamp-3">
 
-                    {article.summary}
+
+                  <p className="
+                    text-gray-600
+                    mt-3
+                    line-clamp-3
+                  ">
+
+                    {article.excerpt}
 
                   </p>
 
@@ -254,15 +338,62 @@ export default function ArticlesPage() {
 
 
 
-                  <div className="mt-4 text-sm text-gray-500">
 
 
-                    By{" "}
 
-                    {article.author
-                      ? `${article.author.firstName} ${article.author.lastName}`
-                      : "Unknown"
-                    }
+                  <div className="
+                    flex
+                    items-center
+                    gap-3
+                    mt-5
+                  ">
+
+
+
+
+                    {article.author?.image ? (
+
+                      <img
+
+                        src={article.author.image}
+
+                        alt="Author"
+
+                        className="
+                          w-8
+                          h-8
+                          rounded-full
+                          object-cover
+                        "
+
+                      />
+
+
+                    ) : null}
+
+
+
+
+
+                    <p className="
+                      text-sm
+                      text-gray-500
+                    ">
+
+
+                      By{" "}
+
+                      {article.author
+                        ?
+                        `${article.author.firstName} ${article.author.lastName}`
+                        :
+                        "Unknown"
+                      }
+
+
+                    </p>
+
+
 
 
                   </div>
@@ -271,11 +402,18 @@ export default function ArticlesPage() {
 
 
 
-                  <div className="text-xs text-gray-400 mt-2">
+
+
+                  <p className="
+                    text-xs
+                    text-gray-400
+                    mt-3
+                  ">
 
                     {article.views || 0} views
 
-                  </div>
+                  </p>
+
 
 
 
@@ -284,11 +422,16 @@ export default function ArticlesPage() {
 
 
 
+
+
               </Link>
 
 
 
+
+
             </article>
+
 
 
 
@@ -300,7 +443,10 @@ export default function ArticlesPage() {
 
 
 
+
       )}
+
+
 
 
 
