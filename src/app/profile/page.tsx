@@ -6,86 +6,45 @@ import { useEffect, useState } from "react";
 
 export default function ProfilePage() {
 
-
-  const { data: session } =
-    useSession();
+  const { data: session } = useSession();
 
 
+  const [firstName,setFirstName] = useState("");
+  const [lastName,setLastName] = useState("");
+  const [bio,setBio] = useState("");
+  const [image,setImage] = useState("");
 
-  const [firstName,setFirstName] =
-    useState("");
+  const [currentPassword,setCurrentPassword] = useState("");
+  const [newPassword,setNewPassword] = useState("");
+  const [confirmPassword,setConfirmPassword] = useState("");
 
-  const [lastName,setLastName] =
-    useState("");
-
-  const [bio,setBio] =
-    useState("");
-
-  const [image,setImage] =
-    useState("");
-
-
-
-  const [currentPassword,setCurrentPassword] =
-    useState("");
-
-  const [newPassword,setNewPassword] =
-    useState("");
-
-  const [confirmPassword,setConfirmPassword] =
-    useState("");
-
-
-
-  const [saving,setSaving] =
-    useState(false);
-
-
-  const [message,setMessage] =
-    useState("");
-
+  const [saving,setSaving] = useState(false);
+  const [message,setMessage] = useState("");
 
 
 
   useEffect(()=>{
 
-
     async function loadProfile(){
 
+      const res = await fetch("/api/profile");
 
-      const response =
-        await fetch("/api/profile");
+      if(res.ok){
 
-
-      if(response.ok){
-
-
-        const user =
-          await response.json();
-
-
+        const user = await res.json();
 
         setFirstName(user.firstName || "");
-
         setLastName(user.lastName || "");
-
         setBio(user.bio || "");
-
         setImage(user.image || "");
-
 
       }
 
-
     }
 
 
-
-    if(session){
-
+    if(session)
       loadProfile();
-
-    }
 
 
   },[session]);
@@ -93,58 +52,35 @@ export default function ProfilePage() {
 
 
 
+  const passwordRules = {
 
+    length:newPassword.length >= 8,
 
+    lowercase:/[a-z]/.test(newPassword),
 
-  function passwordStrength(password:string){
+    uppercase:/[A-Z]/.test(newPassword),
 
+    number:/[0-9]/.test(newPassword),
 
-    let score = 0;
-
-
-    if(password.length >= 8)
-      score++;
-
-
-    if(/[a-z]/.test(password))
-      score++;
-
-
-    if(/[A-Z]/.test(password))
-      score++;
-
-
-    if(/[0-9]/.test(password))
-      score++;
-
-
-
-    return score;
-
-  }
-
-
-
+  };
 
 
 
   const strength =
-    passwordStrength(newPassword);
+    Object.values(passwordRules)
+    .filter(Boolean)
+    .length;
 
 
 
-  const strengthText =
-    strength === 0
-      ? ""
-      : strength === 1
-      ? "Weak"
-      : strength === 2
-      ? "Medium"
-      : strength === 3
-      ? "Strong"
-      : "Very Strong";
-
-
+  const strengthLabel =
+    strength <= 1
+    ? "Weak"
+    : strength === 2
+    ? "Medium"
+    : strength === 3
+    ? "Strong"
+    : "Very Strong";
 
 
 
@@ -155,7 +91,6 @@ export default function ProfilePage() {
 
 
     setSaving(true);
-
     setMessage("");
 
 
@@ -165,14 +100,8 @@ export default function ProfilePage() {
 
       if(newPassword !== confirmPassword){
 
-
-        setMessage(
-          "Passwords do not match"
-        );
-
-
+        setMessage("Passwords do not match");
         setSaving(false);
-
         return;
 
       }
@@ -181,14 +110,11 @@ export default function ProfilePage() {
 
       if(strength < 4){
 
-
         setMessage(
-          "Password must contain 8+ characters, uppercase, lowercase and number"
+          "Password must include uppercase, lowercase, number and 8+ characters"
         );
 
-
         setSaving(false);
-
         return;
 
       }
@@ -200,89 +126,48 @@ export default function ProfilePage() {
 
 
 
+    const res = await fetch("/api/profile",{
 
-    try {
+      method:"PUT",
 
+      headers:{
+        "Content-Type":"application/json"
+      },
 
-      const response =
-        await fetch(
-          "/api/profile",
-          {
+      body:JSON.stringify({
 
-            method:"PUT",
+        firstName,
+        lastName,
+        bio,
+        image,
+        currentPassword,
+        newPassword
 
-            headers:{
-              "Content-Type":
-              "application/json",
-            },
+      })
 
-
-            body:JSON.stringify({
-
-              firstName,
-
-              lastName,
-
-              bio,
-
-              image,
-
-              currentPassword,
-
-              newPassword,
-
-            }),
-
-          }
-        );
+    });
 
 
 
-      const data =
-        await response.json();
+    const data = await res.json();
 
 
 
+    if(res.ok){
 
-      if(response.ok){
+      setMessage("Profile updated successfully");
 
+      setCurrentPassword("");
+      setNewPassword("");
+      setConfirmPassword("");
 
-        setMessage(
-          "Profile updated successfully"
-        );
-
-
-        setCurrentPassword("");
-
-        setNewPassword("");
-
-        setConfirmPassword("");
-
-
-
-      }else{
-
-
-        setMessage(
-          data.message ||
-          "Update failed"
-        );
-
-
-      }
-
-
-
-    }catch(error){
-
+    }else{
 
       setMessage(
-        "Something went wrong"
+        data.message || "Update failed"
       );
 
-
     }
-
 
 
     setSaving(false);
@@ -293,410 +178,333 @@ export default function ProfilePage() {
 
 
 
+  const initials =
+    (
+      firstName[0] || ""
+    )
+    +
+    (
+      lastName[0] || ""
+    )
+    .toUpperCase();
 
 
-  const initials = (
 
-    firstName.charAt(0) +
 
-    lastName.charAt(0)
 
-  ).toUpperCase();
+return (
 
+<main className="max-w-3xl mx-auto px-6 py-12">
 
 
+<h1 className="text-4xl font-bold mb-8">
+Profile Settings
+</h1>
 
 
 
+<div className="bg-white border rounded-2xl shadow-sm p-8">
 
-  return (
 
-    <main className="
-      max-w-3xl
-      mx-auto
-      px-6
-      py-10
-    ">
+<div className="flex justify-center mb-8">
 
 
-      <h1 className="
-        text-4xl
-        font-bold
-        mb-10
-      ">
+<div className="
+w-28
+h-28
+rounded-full
+bg-black
+text-white
+flex
+items-center
+justify-center
+text-4xl
+font-bold
+overflow-hidden
+">
 
-        Edit Profile
 
-      </h1>
+{
+image ?
 
+<img
+src={image}
+className="w-full h-full object-cover"
+/>
 
+:
 
+initials || "U"
 
+}
 
-      <div className="
-        bg-white
-        border
-        rounded-2xl
-        p-8
-        shadow-sm
-      ">
 
 
+</div>
 
 
+</div>
 
-        <div className="
-          flex
-          flex-col
-          items-center
-          mb-10
-        ">
 
 
-          <div className="
-            w-28
-            h-28
-            rounded-full
-            bg-black
-            text-white
-            flex
-            items-center
-            justify-center
-            text-4xl
-            font-bold
-            overflow-hidden
-          ">
 
 
-            {image ? (
+<div className="grid md:grid-cols-2 gap-5">
 
-              <img
 
-                src={image}
+<input
+value={firstName}
+onChange={e=>setFirstName(e.target.value)}
+placeholder="First Name"
+className="border rounded-xl p-3"
+/>
 
-                alt="Profile"
 
-                className="
-                w-full
-                h-full
-                object-cover
-                "
+<input
+value={lastName}
+onChange={e=>setLastName(e.target.value)}
+placeholder="Last Name"
+className="border rounded-xl p-3"
+/>
 
-              />
 
-            ) : (
+</div>
 
-              initials || "U"
 
-            )}
 
 
+<textarea
 
-          </div>
+value={bio}
 
+onChange={e=>setBio(e.target.value)}
 
-        </div>
+placeholder="Bio"
 
+className="
+w-full
+border
+rounded-xl
+p-3
+mt-5
+"
 
+rows={5}
 
+/>
 
 
 
 
 
-        <div className="
-          grid
-          md:grid-cols-2
-          gap-6
-        ">
 
+<h2 className="text-2xl font-bold mt-10 mb-5">
+Change Password
+</h2>
 
-          <input
 
-            value={firstName}
 
-            onChange={(e)=>
-              setFirstName(e.target.value)
-            }
+<input
 
-            placeholder="First Name"
+type="password"
 
-            className="
-            border
-            rounded-xl
-            p-3
-            "
+value={currentPassword}
 
-          />
+onChange={e=>setCurrentPassword(e.target.value)}
 
+placeholder="Current password"
 
+className="
+w-full
+border
+rounded-xl
+p-3
+mb-4
+"
 
-          <input
+/>
 
-            value={lastName}
 
-            onChange={(e)=>
-              setLastName(e.target.value)
-            }
 
-            placeholder="Last Name"
 
-            className="
-            border
-            rounded-xl
-            p-3
-            "
 
-          />
+<input
 
+type="password"
 
-        </div>
+value={newPassword}
 
+onChange={e=>setNewPassword(e.target.value)}
 
+placeholder="New password"
 
+className="
+w-full
+border
+rounded-xl
+p-3
+"
 
+/>
 
 
 
-        <textarea
 
-          value={bio}
 
-          onChange={(e)=>
-            setBio(e.target.value)
-          }
+{
+newPassword &&
 
-          placeholder="Bio"
+<div className="mt-4">
 
-          rows={5}
 
-          className="
-          w-full
-          border
-          rounded-xl
-          p-3
-          mt-6
-          "
+<div className="flex gap-2">
 
-        />
 
+{
+[1,2,3,4].map(i=>(
 
+<div
 
+key={i}
 
+className={`
+h-2
+flex-1
+rounded
 
+${
+strength >= i
+?
+"bg-black"
+:
+"bg-gray-200"
+}
 
+`}
 
+/>
 
+))
 
-        <h2 className="
-          text-2xl
-          font-bold
-          mt-10
-          mb-5
-        ">
+}
 
-          Change Password
 
-        </h2>
+</div>
 
 
+<p className="text-sm mt-2 font-medium">
 
+{strengthLabel}
 
+</p>
 
-        <div className="space-y-4">
 
+<div className="text-xs text-gray-500 mt-3 space-y-1">
 
-          <input
+<p className={passwordRules.length?"text-black":""}>
+✓ 8 characters
+</p>
 
-            type="password"
+<p className={passwordRules.uppercase?"text-black":""}>
+✓ Uppercase letter
+</p>
 
-            placeholder="Current Password"
+<p className={passwordRules.lowercase?"text-black":""}>
+✓ Lowercase letter
+</p>
 
-            value={currentPassword}
+<p className={passwordRules.number?"text-black":""}>
+✓ Number
+</p>
 
-            onChange={(e)=>
-              setCurrentPassword(e.target.value)
-            }
 
-            className="
-            w-full
-            border
-            rounded-xl
-            p-3
-            "
+</div>
 
-          />
 
+</div>
 
+}
 
 
 
-          <input
 
-            type="password"
 
-            placeholder="New Password"
 
-            value={newPassword}
+<input
 
-            onChange={(e)=>
-              setNewPassword(e.target.value)
-            }
+type="password"
 
-            className="
-            w-full
-            border
-            rounded-xl
-            p-3
-            "
+value={confirmPassword}
 
-          />
+onChange={e=>setConfirmPassword(e.target.value)}
 
+placeholder="Confirm password"
 
+className="
+w-full
+border
+rounded-xl
+p-3
+mt-5
+"
 
+/>
 
 
 
-          {newPassword && (
 
-            <div>
 
 
-              <div className="
-                flex
-                gap-2
-                mt-3
-              ">
 
+<button
 
-                {[1,2,3,4].map((bar)=>(
+disabled={saving}
 
-                  <div
+onClick={saveProfile}
 
-                    key={bar}
+className="
+mt-8
+bg-black
+text-white
+px-8
+py-3
+rounded-xl
+disabled:opacity-50
+"
 
-                    className={`
-                      h-2
-                      flex-1
-                      rounded
-                      ${
-                        strength >= bar
-                        ? "bg-black"
-                        : "bg-gray-200"
-                      }
-                    `}
+>
 
-                  />
+{
+saving
+?
+"Saving..."
+:
+"Save Changes"
+}
 
-                ))}
+</button>
 
 
-              </div>
 
+{
+message &&
 
-              <p className="
-                text-sm
-                mt-2
-              ">
+<p className="mt-4 text-sm text-gray-600">
 
-                {strengthText}
+{message}
 
-              </p>
+</p>
 
+}
 
 
-            </div>
 
-          )}
+</div>
 
 
+</main>
 
-
-
-
-          <input
-
-            type="password"
-
-            placeholder="Confirm New Password"
-
-            value={confirmPassword}
-
-            onChange={(e)=>
-              setConfirmPassword(e.target.value)
-            }
-
-            className="
-            w-full
-            border
-            rounded-xl
-            p-3
-            "
-
-          />
-
-
-        </div>
-
-
-
-
-
-
-
-        <button
-
-          onClick={saveProfile}
-
-          disabled={saving}
-
-          className="
-          mt-8
-          bg-black
-          text-white
-          px-8
-          py-3
-          rounded-xl
-          disabled:opacity-50
-          "
-
-        >
-
-          {saving
-            ? "Saving..."
-            : "Save Changes"
-          }
-
-        </button>
-
-
-
-
-
-
-
-        {message && (
-
-          <p className="
-            mt-4
-            text-sm
-            text-gray-600
-          ">
-
-            {message}
-
-          </p>
-
-        )}
-
-
-
-      </div>
-
-
-    </main>
-
-  );
+);
 
 
 }
