@@ -47,9 +47,10 @@ const UserSchema = new Schema(
       enum: [
         "admin",
         "writer",
+        "reader",
       ],
 
-      default:"writer",
+      default:"reader",
 
     },
 
