@@ -3,7 +3,6 @@ import { connectDB } from "@/src/lib/mongodb";
 import User from "@/src/models/User";
 import bcrypt from "bcryptjs";
 
-
 export const authOptions = {
 
   providers: [
@@ -26,72 +25,47 @@ export const authOptions = {
 
       },
 
-
       async authorize(credentials) {
-
 
         if (
           !credentials?.email ||
           !credentials?.password
         ) {
-
           return null;
-
         }
-
 
         await connectDB();
 
-
-
         const user = await User.findOne({
-
           email: credentials.email,
-
         });
 
-
-
         if (!user) {
-
           return null;
-
         }
 
-
-
-        const passwordMatch =
-          await bcrypt.compare(
-
-            credentials.password,
-
-            user.password
-
-          );
-
-
+        const passwordMatch = await bcrypt.compare(
+          credentials.password,
+          user.password
+        );
 
         if (!passwordMatch) {
-
           return null;
-
         }
-
-
 
         return {
 
           id: user._id.toString(),
 
-          name:
-            `${user.firstName} ${user.lastName}`,
+          name: `${user.firstName} ${user.lastName}`,
 
           email: user.email,
 
           role: user.role,
 
-        };
+          image: user.image || null,
 
+        };
 
       },
 
@@ -99,21 +73,15 @@ export const authOptions = {
 
   ],
 
-
-
   pages: {
 
     signIn: "/login",
 
   },
 
-
-
   callbacks: {
 
-
     async jwt({ token, user }: any) {
-
 
       if (user) {
 
@@ -121,37 +89,31 @@ export const authOptions = {
 
         token.role = user.role;
 
-      }
+        token.picture = user.image;
 
+      }
 
       return token;
 
     },
 
-
-
     async session({ session, token }: any) {
 
-
       if (session.user) {
-
 
         session.user.id = token.id;
 
         session.user.role = token.role;
 
+        session.user.image = token.picture;
 
       }
-
 
       return session;
 
     },
 
-
   },
-
-
 
   secret: process.env.NEXTAUTH_SECRET,
 
