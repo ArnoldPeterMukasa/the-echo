@@ -7,10 +7,20 @@ import { useSession, signOut } from "next-auth/react";
 
 export default function Header() {
 
-  const { data: session } = useSession();
 
-  const [open, setOpen] = useState(false);
-  const [mobile, setMobile] = useState(false);
+  const {
+    data: session,
+    update,
+  } = useSession();
+
+
+  const [open,setOpen] =
+    useState(false);
+
+
+  const [mobile,setMobile] =
+    useState(false);
+
 
 
 
@@ -18,8 +28,15 @@ export default function Header() {
     session?.user?.name || "";
 
 
+
   const parts =
     name.split(" ");
+
+
+
+  const firstName =
+    parts[0] || "";
+
 
 
   const initials =
@@ -30,14 +47,21 @@ export default function Header() {
 
 
 
+
   function closeMenus(){
-    setMobile(false);
+
     setOpen(false);
+
+    setMobile(false);
+
   }
 
 
 
+
+
   return (
+
 
 <header className="
 sticky
@@ -46,6 +70,7 @@ bg-white
 border-b
 z-50
 ">
+
 
 
 <div className="
@@ -59,7 +84,13 @@ justify-between
 ">
 
 
-<Link href="/home" onClick={closeMenus}>
+
+
+
+<Link
+href="/home"
+onClick={closeMenus}
+>
 
 <div>
 
@@ -67,7 +98,9 @@ justify-between
 text-2xl
 font-bold
 ">
+
 The Echo
+
 </h1>
 
 
@@ -75,13 +108,18 @@ The Echo
 text-xs
 text-gray-500
 ">
+
 Echoing Reality of Thousands...
+
 </p>
 
 
 </div>
 
 </Link>
+
+
+
 
 
 
@@ -94,11 +132,14 @@ md:hidden
 text-2xl
 "
 
-aria-label="Toggle menu"
+aria-label="Menu"
 
-onClick={()=> {
-  setMobile(!mobile);
-  setOpen(false);
+onClick={()=>{
+
+setMobile(!mobile);
+
+setOpen(false);
+
 }}
 
 >
@@ -106,6 +147,9 @@ onClick={()=> {
 {mobile ? "✕" : "☰"}
 
 </button>
+
+
+
 
 
 
@@ -160,6 +204,8 @@ font-medium
 
 
 
+
+
 <Link href="/home" onClick={closeMenus}>
 Home
 </Link>
@@ -169,6 +215,7 @@ Home
 <Link href="/articles" onClick={closeMenus}>
 Articles
 </Link>
+
 
 
 
@@ -191,7 +238,6 @@ About
 
 
 
-
 <Link href="/contact" onClick={closeMenus}>
 Contact
 </Link>
@@ -203,12 +249,13 @@ Contact
 
 
 
+
 {!session ? (
+
 
 <div className="
 flex
 gap-3
-items-center
 ">
 
 
@@ -255,6 +302,7 @@ Sign Up
 </Link>
 
 
+
 </div>
 
 
@@ -263,7 +311,11 @@ Sign Up
 
 
 
+
 <div className="relative">
+
+
+
 
 
 <button
@@ -277,6 +329,7 @@ gap-3
 "
 
 >
+
 
 
 <div className="
@@ -293,7 +346,8 @@ overflow-hidden
 ">
 
 
-{session.user.image ? (
+{session.user?.image ? (
+
 
 <img
 
@@ -309,22 +363,29 @@ object-cover
 
 />
 
+
 ) : (
+
 
 initials || "U"
 
+
 )}
+
 
 
 </div>
 
 
 
+
+
 <span className="font-semibold">
 
-{parts[0]}
+{firstName}
 
 </span>
+
 
 
 
@@ -343,29 +404,24 @@ initials || "U"
 
 
 
+
 {open && (
 
+
 <div className="
-
 absolute
-
 right-0
-
 mt-3
-
 w-60
-
 bg-white
-
 border
-
 rounded-xl
-
 shadow-lg
-
 overflow-hidden
-
 ">
+
+
+
 
 
 <div className="
@@ -376,7 +432,7 @@ border-b
 
 <p className="font-semibold">
 
-{session.user.name}
+{session.user?.name}
 
 </p>
 
@@ -386,7 +442,7 @@ text-xs
 text-gray-500
 ">
 
-{session.user.email}
+{session.user?.email}
 
 </p>
 
@@ -397,12 +453,14 @@ text-gray-400
 capitalize
 ">
 
-{session.user.role}
+{session.user?.role}
 
 </p>
 
 
 </div>
+
+
 
 
 
@@ -431,11 +489,23 @@ Edit Profile
 
 
 
+
+
 <button
 
-onClick={()=>signOut({
+onClick={async()=>{
+
+closeMenus();
+
+await update();
+
+signOut({
+
 callbackUrl:"/home"
-})}
+
+});
+
+}}
 
 className="
 w-full
@@ -453,13 +523,20 @@ Logout
 </button>
 
 
+
+
+
 </div>
+
 
 )}
 
 
 
+
+
 </div>
+
 
 
 )}
@@ -470,10 +547,13 @@ Logout
 </nav>
 
 
+
+
 </div>
 
 
 </header>
+
 
   );
 
