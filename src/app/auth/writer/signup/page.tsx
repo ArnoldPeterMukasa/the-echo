@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import Link from "next/link";
 
 
 export default function WriterSignupPage() {
@@ -12,24 +13,32 @@ export default function WriterSignupPage() {
 
   const [form, setForm] = useState({
 
-    firstName: "",
-    lastName: "",
-    email: "",
-    password: "",
-    confirmPassword: "",
+    firstName:"",
+    lastName:"",
+    email:"",
+    password:"",
+    confirmPassword:"",
 
   });
 
 
-  const [error, setError] = useState("");
 
-  const [loading, setLoading] = useState(false);
+  const [error,setError] =
+    useState("");
+
+
+
+  const [loading,setLoading] =
+    useState(false);
+
+
 
 
 
   const handleChange = (
-    e: React.ChangeEvent<HTMLInputElement>
-  ) => {
+    e:React.ChangeEvent<HTMLInputElement>
+  )=>{
+
 
     setForm({
 
@@ -40,21 +49,28 @@ export default function WriterSignupPage() {
 
     });
 
+
   };
 
 
 
-  const signup = async () => {
+
+
+
+
+
+  const signup = async()=>{
 
 
     setError("");
 
 
 
-    if (
+
+    if(
       form.password !==
       form.confirmPassword
-    ) {
+    ){
 
       setError(
         "Passwords do not match"
@@ -66,9 +82,38 @@ export default function WriterSignupPage() {
 
 
 
-    try {
+
+
+
+    const validPassword =
+      /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d).{8,}$/;
+
+
+
+    if(!validPassword.test(form.password)){
+
+
+      setError(
+        "Password must contain uppercase, lowercase and number"
+      );
+
+
+      return;
+
+
+    }
+
+
+
+
+
+
+
+    try{
+
 
       setLoading(true);
+
 
 
 
@@ -76,14 +121,18 @@ export default function WriterSignupPage() {
         await fetch(
           "/api/auth/writer/signup",
           {
-            method: "POST",
 
-            headers: {
+            method:"POST",
+
+            headers:{
+
               "Content-Type":
                 "application/json",
+
             },
 
-            body: JSON.stringify({
+
+            body:JSON.stringify({
 
               firstName:
                 form.firstName,
@@ -100,7 +149,10 @@ export default function WriterSignupPage() {
             }),
 
           }
+
         );
+
+
 
 
 
@@ -109,15 +161,24 @@ export default function WriterSignupPage() {
 
 
 
-      if (!res.ok) {
+
+
+
+      if(!res.ok){
+
 
         setError(
           data.message
         );
 
+
         return;
 
+
       }
+
+
+
 
 
 
@@ -126,24 +187,37 @@ export default function WriterSignupPage() {
       );
 
 
-    } catch {
+
+
+    }catch{
+
 
       setError(
         "Something went wrong"
       );
 
-    } finally {
+
+
+    }finally{
+
 
       setLoading(false);
 
+
     }
+
 
 
   };
 
 
 
+
+
+
+
   return (
+
 
     <main className="
       min-h-screen
@@ -151,22 +225,27 @@ export default function WriterSignupPage() {
       items-center
       justify-center
       px-6
+      bg-gray-50
     ">
+
 
 
       <div className="
         w-full
         max-w-md
+        bg-white
         border
-        rounded-xl
+        rounded-2xl
         p-8
+        shadow
       ">
+
 
 
         <h1 className="
           text-3xl
           font-bold
-          mb-6
+          mb-2
         ">
 
           Writer Sign Up
@@ -175,119 +254,85 @@ export default function WriterSignupPage() {
 
 
 
-        <input
+        <p className="
+          text-gray-500
+          mb-6
+        ">
 
-          name="firstName"
+          Join The Echo as a contributor.
 
-          placeholder="First Name"
-
-          value={form.firstName}
-
-          onChange={handleChange}
-
-          className="
-            border
-            rounded
-            p-3
-            w-full
-            mb-3
-          "
-
-        />
+        </p>
 
 
 
-        <input
-
-          name="lastName"
-
-          placeholder="Last Name"
-
-          value={form.lastName}
-
-          onChange={handleChange}
-
-          className="
-            border
-            rounded
-            p-3
-            w-full
-            mb-3
-          "
-
-        />
 
 
 
-        <input
+        {[
+          {
+            name:"firstName",
+            placeholder:"First Name"
+          },
+          {
+            name:"lastName",
+            placeholder:"Last Name"
+          },
+          {
+            name:"email",
+            placeholder:"Email"
+          },
+          {
+            name:"password",
+            placeholder:"Password"
+          },
+          {
+            name:"confirmPassword",
+            placeholder:"Confirm Password"
+          },
 
-          name="email"
-
-          type="email"
-
-          placeholder="Email"
-
-          value={form.email}
-
-          onChange={handleChange}
-
-          className="
-            border
-            rounded
-            p-3
-            w-full
-            mb-3
-          "
-
-        />
-
-
-
-        <input
-
-          name="password"
-
-          type="password"
-
-          placeholder="Password"
-
-          value={form.password}
-
-          onChange={handleChange}
-
-          className="
-            border
-            rounded
-            p-3
-            w-full
-            mb-3
-          "
-
-        />
+        ].map((field)=>(
 
 
+          <input
 
-        <input
+            key={field.name}
 
-          name="confirmPassword"
+            name={field.name}
 
-          type="password"
+            type={
+              field.name.includes("password")
+              ? "password"
+              : field.name === "email"
+              ? "email"
+              : "text"
+            }
 
-          placeholder="Confirm Password"
+            placeholder={field.placeholder}
 
-          value={form.confirmPassword}
+            value={
+              form[
+                field.name as keyof typeof form
+              ]
+            }
 
-          onChange={handleChange}
+            onChange={handleChange}
 
-          className="
-            border
-            rounded
-            p-3
-            w-full
-            mb-4
-          "
+            className="
+              border
+              rounded-lg
+              p-3
+              w-full
+              mb-3
+            "
 
-        />
+          />
+
+
+        ))}
+
+
+
+
 
 
 
@@ -307,6 +352,10 @@ export default function WriterSignupPage() {
 
 
 
+
+
+
+
         <button
 
           onClick={signup}
@@ -316,16 +365,17 @@ export default function WriterSignupPage() {
           className="
             bg-black
             text-white
-            rounded
+            rounded-lg
             py-3
             w-full
           "
 
         >
 
-          {loading
+          {
+            loading
             ? "Creating account..."
-            : "Sign Up"
+            : "Create Writer Account"
           }
 
 
@@ -333,10 +383,40 @@ export default function WriterSignupPage() {
 
 
 
+
+
+
+
+        <p className="
+          text-center
+          text-sm
+          mt-6
+          text-gray-500
+        ">
+
+          Already a writer?{" "}
+
+
+          <Link
+            href="/auth/writer/login"
+            className="text-black font-semibold"
+          >
+
+            Login
+
+          </Link>
+
+
+        </p>
+
+
+
+
       </div>
 
 
     </main>
+
 
   );
 
