@@ -19,6 +19,9 @@ export default function SearchArticles() {
 
     if(article.status !== "published") return false;
 
+    const authorName = article.author
+      ? `${article.author.firstName} ${article.author.lastName}`
+      : "";
 
     return (
       article.title
@@ -33,7 +36,7 @@ export default function SearchArticles() {
 
       ||
 
-      article.author
+      authorName
       .toLowerCase()
       .includes(query.toLowerCase())
     );
@@ -88,12 +91,12 @@ export default function SearchArticles() {
 
 
             <p className="text-sm text-gray-600 mt-3">
-              {article.summary}
+              {((article as any).summary || (article as any).excerpt || (article as any).content?.slice?.(0, 150) || "")}
             </p>
 
 
             <p className="text-xs text-gray-400 mt-4">
-              By {article.author}
+              By {article.author ? `${article.author.firstName} ${article.author.lastName}` : ""}
             </p>
 
 
