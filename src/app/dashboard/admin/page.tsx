@@ -19,10 +19,6 @@ export default function AdminDashboard() {
   const router = useRouter();
 
 
-  const { hydrate } = useArticleStore();
-
-
-
   useEffect(() => {
 
     if (status === "loading") {
@@ -49,15 +45,10 @@ export default function AdminDashboard() {
     }
 
 
-
-    hydrate();
-
-
   }, [
     session,
     status,
-    router,
-    hydrate
+    router
   ]);
 
 
