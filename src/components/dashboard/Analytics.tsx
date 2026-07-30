@@ -4,10 +4,17 @@ import { useArticleStore } from "@/src/store/articleStore";
 
 export default function Analytics() {
   const articles = useArticleStore((s) => s.articles);
-  const getTotalViews = useArticleStore((s) => s.getTotalViews);
-  const getTopArticle = useArticleStore((s) => s.getTopArticle);
 
-  const top = getTopArticle();
+  const totalViews = articles.reduce(
+    (sum, article) => sum + (article.views ?? 0),
+    0
+  );
+
+  const top = articles.length
+    ? articles.reduce((best, article) =>
+        (article.views ?? 0) > (best.views ?? 0) ? article : best
+      )
+    : null;
 
   return (
     <section className="grid md:grid-cols-3 gap-6 mb-10">
@@ -21,7 +28,7 @@ export default function Analytics() {
       {/* TOTAL VIEWS */}
       <div className="border rounded-xl p-6">
         <h2 className="text-sm text-gray-500">Total Views</h2>
-        <p className="text-3xl font-bold">{getTotalViews()}</p>
+        <p className="text-3xl font-bold">{totalViews}</p>
       </div>
 
       {/* TOP ARTICLE */}
