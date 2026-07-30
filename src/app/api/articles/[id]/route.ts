@@ -1,19 +1,32 @@
 import { NextResponse } from "next/server";
+import { getServerSession } from "next-auth";
+
 import { connectDB } from "@/src/lib/mongodb";
 import Article from "@/src/models/Article";
+import AdminActivity from "@/src/models/AdminActivity";
+import { authOptions } from "@/src/lib/auth";
+
+
+
+
 
 
 
 export async function GET(
   request: Request,
-  { params }: { params: Promise<{ id: string }> }
+  { params }: { params: Promise<{ id:string }> }
 ) {
+
 
   try {
 
+
     await connectDB();
 
-    const { id } = await params;
+
+    const { id } =
+      await params;
+
 
 
     const article =
@@ -24,40 +37,47 @@ export async function GET(
       );
 
 
-    if (!article) {
+
+    if(!article){
+
 
       return NextResponse.json(
         {
-          message: "Article not found",
+          message:"Article not found"
         },
         {
-          status: 404,
+          status:404
         }
       );
 
+
     }
+
 
 
     return NextResponse.json(article);
 
 
-  } catch(error) {
+
+  }catch(error){
 
 
     console.error(error);
 
 
+
     return NextResponse.json(
       {
-        message:"Server error",
+        message:"Server error"
       },
       {
-        status:500,
+        status:500
       }
     );
 
 
   }
+
 
 }
 
@@ -67,22 +87,61 @@ export async function GET(
 
 
 
+
+
 export async function PUT(
   request: Request,
-  { params }: { params: Promise<{ id: string }> }
+  { params }: { params: Promise<{ id:string }> }
 ) {
+
 
 
   try {
 
 
+
+    const session =
+      await getServerSession(authOptions);
+
+
+
+    if(
+      !session?.user ||
+      session.user.role !== "admin"
+    ){
+
+
+      return NextResponse.json(
+        {
+          message:"Forbidden"
+        },
+        {
+          status:403
+        }
+      );
+
+
+    }
+
+
+
+
+
     await connectDB();
 
 
-    const { id } = await params;
 
 
-    const body = await request.json();
+    const { id } =
+      await params;
+
+
+
+    const body =
+      await request.json();
+
+
+
 
 
 
@@ -93,26 +152,36 @@ export async function PUT(
 
         {
 
-          title: body.title,
+          title:
+            body.title,
 
-          excerpt: body.excerpt,
+          excerpt:
+            body.excerpt,
 
-          content: body.content,
+          content:
+            body.content,
 
-          category: body.category,
+          category:
+            body.category,
 
-          coverImage: body.coverImage,
+          coverImage:
+            body.coverImage,
 
-          status: body.status,
+          status:
+            body.status,
+
 
         },
 
 
         {
-          new:true,
+          new:true
         }
 
       );
+
+
+
 
 
 
@@ -120,15 +189,12 @@ export async function PUT(
 
 
       return NextResponse.json(
-
         {
-          message:"Article not found",
+          message:"Article not found"
         },
-
         {
-          status:404,
+          status:404
         }
-
       );
 
 
@@ -136,11 +202,47 @@ export async function PUT(
 
 
 
-    return NextResponse.json(updatedArticle);
+
+
+    await AdminActivity.create({
+
+      admin:
+        session.user.id,
+
+
+      article:
+        updatedArticle._id,
+
+
+      action:
+        body.status === "published"
+        ? "PUBLISHED_ARTICLE"
+        : body.status === "draft"
+        ? "SENT_BACK_ARTICLE"
+        : "UPDATED_ARTICLE",
+
+
+      details:
+        `${session.user.name} changed "${updatedArticle.title}" status to ${body.status}`,
+
+    });
 
 
 
-  } catch(error){
+
+
+
+
+    return NextResponse.json(
+      updatedArticle
+    );
+
+
+
+
+
+
+  }catch(error){
 
 
     console.error(error);
@@ -148,19 +250,17 @@ export async function PUT(
 
 
     return NextResponse.json(
-
       {
-        message:"Server error",
+        message:"Server error"
       },
-
       {
-        status:500,
+        status:500
       }
-
     );
 
 
   }
+
 
 }
 
@@ -173,18 +273,55 @@ export async function PUT(
 
 
 export async function DELETE(
-  request: Request,
-  { params }: { params: Promise<{ id: string }> }
-) {
+  request:Request,
+  { params }: { params:Promise<{id:string}> }
+){
+
 
 
   try {
 
 
+
+    const session =
+      await getServerSession(authOptions);
+
+
+
+
+    if(
+      !session?.user ||
+      session.user.role !== "admin"
+    ){
+
+
+      return NextResponse.json(
+        {
+          message:"Forbidden"
+        },
+        {
+          status:403
+        }
+      );
+
+
+    }
+
+
+
+
+
     await connectDB();
 
 
-    const { id } = await params;
+
+
+
+    const { id } =
+      await params;
+
+
+
 
 
 
@@ -193,19 +330,18 @@ export async function DELETE(
 
 
 
+
+
     if(!deletedArticle){
 
 
       return NextResponse.json(
-
         {
-          message:"Article not found",
+          message:"Article not found"
         },
-
         {
-          status:404,
+          status:404
         }
-
       );
 
 
@@ -213,17 +349,47 @@ export async function DELETE(
 
 
 
+
+
+
+
+    await AdminActivity.create({
+
+      admin:
+        session.user.id,
+
+
+      article:
+        deletedArticle._id,
+
+
+      action:
+        "DELETED_ARTICLE",
+
+
+      details:
+        `${session.user.name} deleted "${deletedArticle.title}"`,
+
+    });
+
+
+
+
+
+
+
     return NextResponse.json(
-
       {
-        success:true,
+        success:true
       }
-
     );
 
 
 
-  } catch(error){
+
+
+
+  }catch(error){
 
 
     console.error(error);
@@ -231,18 +397,16 @@ export async function DELETE(
 
 
     return NextResponse.json(
-
       {
-        message:"Server error",
+        message:"Server error"
       },
-
       {
-        status:500,
+        status:500
       }
-
     );
 
 
   }
+
 
 }
