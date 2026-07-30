@@ -3,10 +3,9 @@
 import Link from "next/link";
 import { useState } from "react";
 import { useSession, signOut } from "next-auth/react";
-
+import { Search } from "lucide-react";
 
 export default function Header() {
-
 
   const {
     data: session,
@@ -14,29 +13,20 @@ export default function Header() {
   } = useSession();
 
 
-  const [open,setOpen] =
-    useState(false);
-
-
-  const [mobile,setMobile] =
-    useState(false);
-
-
+  const [open, setOpen] = useState(false);
+  const [mobile, setMobile] = useState(false);
 
 
   const name =
     session?.user?.name || "";
 
 
-
   const parts =
     name.split(" ");
 
 
-
   const firstName =
     parts[0] || "";
-
 
 
   const initials =
@@ -47,8 +37,7 @@ export default function Header() {
 
 
 
-
-  function closeMenus(){
+  function closeMenus() {
 
     setOpen(false);
 
@@ -58,66 +47,85 @@ export default function Header() {
 
 
 
-
-
   return (
 
+    <header
+      className="
+        sticky
+        top-0
+        bg-white
+        border-b
+        z-50
+      "
+    >
 
-<header className="
-sticky
-top-0
-bg-white
-border-b
-z-50
-">
 
+      <div
+        className="
+          max-w-7xl
+          mx-auto
+          px-6
+          h-16
+          flex
+          items-center
+          justify-between
+        "
+      >
 
 
-<div className="
-max-w-7xl
-mx-auto
-px-6
-h-16
-flex
-items-center
-justify-between
-">
 
+        <Link
+          href="/"
+          onClick={closeMenus}
+        >
 
+          <div>
 
+            <h1
+              className="
+                text-2xl
+                font-bold
+              "
+            >
+              The Echo
+            </h1>
 
 
-<Link
-href="/home"
-onClick={closeMenus}
->
+            <p
+              className="
+                text-xs
+                text-gray-500
+              "
+            >
+              Echoing Reality of Thousands...
+            </p>
 
-<div>
+          </div>
 
-<h1 className="
-text-2xl
-font-bold
-">
+        </Link>
 
-The Echo
 
-</h1>
 
 
-<p className="
-text-xs
-text-gray-500
-">
 
-Echoing Reality of Thousands...
+        <button
+          className="
+            md:hidden
+            text-2xl
+          "
+          aria-label="Menu"
+          onClick={()=>{
 
-</p>
+            setMobile(!mobile);
 
+            setOpen(false);
 
-</div>
+          }}
+        >
 
-</Link>
+          {mobile ? "✕" : "☰"}
 
+        </button>
 
 
 
@@ -125,435 +133,408 @@ Echoing Reality of Thousands...
 
 
 
-<button
+        <nav
 
-className="
-md:hidden
-text-2xl
-"
+          className={`
 
-aria-label="Menu"
+          ${mobile ? "flex" : "hidden"}
 
-onClick={()=>{
+          md:flex
 
-setMobile(!mobile);
+          absolute
 
-setOpen(false);
+          md:static
 
-}}
+          top-16
 
->
+          left-0
 
-{mobile ? "✕" : "☰"}
+          right-0
 
-</button>
+          bg-white
 
+          md:bg-transparent
 
+          border-b
 
+          md:border-none
 
+          flex-col
 
+          md:flex-row
 
+          items-center
 
+          gap-5
 
+          p-6
 
-<nav
+          md:p-0
 
-className={`
+          text-sm
 
-${mobile ? "flex" : "hidden"}
+          font-medium
 
-md:flex
+          `}
 
-absolute
+        >
 
-md:static
 
-top-16
 
-left-0
 
-right-0
+          <Link href="/" onClick={closeMenus}>
+            Cover
+          </Link>
 
-bg-white
 
-md:bg-transparent
 
-border-b
+          <Link href="/home" onClick={closeMenus}>
+            Home
+          </Link>
 
-md:border-none
 
-flex-col
 
-md:flex-row
+          <Link href="/articles" onClick={closeMenus}>
+            
+            <span className="flex items-center gap-2">
 
-items-center
+              <Search
+                size={16}
+              />
 
-gap-6
+              Search Articles
 
-p-6
+            </span>
 
-md:p-0
+          </Link>
 
-text-sm
 
-font-medium
 
-`}
 
->
+          {session && (
 
+            <Link
+              href="/dashboard"
+              onClick={closeMenus}
+            >
+              Dashboard
+            </Link>
 
+          )}
 
 
 
-<Link href="/home" onClick={closeMenus}>
-Home
-</Link>
 
 
+          <Link
+            href="/about"
+            onClick={closeMenus}
+          >
+            About
+          </Link>
 
-<Link href="/articles" onClick={closeMenus}>
-Articles
-</Link>
 
 
 
 
+          <Link
+            href="/contact"
+            onClick={closeMenus}
+          >
+            Contact
+          </Link>
 
-{session && (
 
-<Link href="/dashboard" onClick={closeMenus}>
-Dashboard
-</Link>
 
-)}
 
 
 
 
+          {!session ? (
 
-<Link href="/about" onClick={closeMenus}>
-About
-</Link>
+            <div
+              className="
+                flex
+                gap-3
+              "
+            >
 
+              <Link
 
+                href="/auth"
 
-<Link href="/contact" onClick={closeMenus}>
-Contact
-</Link>
+                onClick={closeMenus}
 
+                className="
+                  px-4
+                  py-2
+                  rounded-lg
+                  bg-black
+                  text-white
+                "
 
+              >
 
+                Login
 
+              </Link>
 
 
 
 
+              <Link
 
-{!session ? (
+                href="/auth/register"
 
+                onClick={closeMenus}
 
-<div className="
-flex
-gap-3
-">
+                className="
+                  px-4
+                  py-2
+                  rounded-lg
+                  border
+                "
 
+              >
 
-<Link
+                Create Account
 
-href="/auth"
+              </Link>
 
-onClick={closeMenus}
 
-className="
-px-4
-py-2
-rounded-lg
-bg-black
-text-white
-"
 
->
+            </div>
 
-Login
 
-</Link>
 
+          ) : (
 
 
+            <div className="relative">
 
-<Link
 
-href="/auth/register"
+              <button
 
-onClick={closeMenus}
+                onClick={()=>
+                  setOpen(!open)
+                }
 
-className="
-px-4
-py-2
-rounded-lg
-border
-"
+                className="
+                  flex
+                  items-center
+                  gap-3
+                "
 
->
+              >
 
-Sign Up
 
-</Link>
 
+                <div
 
+                  className="
+                    w-10
+                    h-10
+                    rounded-full
+                    bg-black
+                    text-white
+                    flex
+                    items-center
+                    justify-center
+                    font-bold
+                    overflow-hidden
+                  "
 
-</div>
+                >
 
 
+                  {session.user?.image ? (
 
-) : (
+                    <img
 
+                      src={session.user.image}
 
+                      alt="Profile"
 
+                      className="
+                        w-full
+                        h-full
+                        object-cover
+                      "
 
-<div className="relative">
+                    />
 
+                  ) : (
 
+                    initials || "U"
 
+                  )}
 
 
-<button
+                </div>
 
-onClick={()=>setOpen(!open)}
 
-className="
-flex
-items-center
-gap-3
-"
 
->
 
+                <span className="font-semibold">
 
+                  {firstName}
 
-<div className="
-w-10
-h-10
-rounded-full
-bg-black
-text-white
-flex
-items-center
-justify-center
-font-bold
-overflow-hidden
-">
+                </span>
 
 
-{session.user?.image ? (
 
+                <span>
+                  ▼
+                </span>
 
-<img
 
-src={session.user.image}
+              </button>
 
-alt="Profile"
 
-className="
-w-full
-h-full
-object-cover
-"
 
-/>
 
 
-) : (
+              {open && (
 
+                <div
 
-initials || "U"
+                  className="
+                    absolute
+                    right-0
+                    mt-3
+                    w-60
+                    bg-white
+                    border
+                    rounded-xl
+                    shadow-lg
+                    overflow-hidden
+                  "
 
+                >
 
-)}
 
 
+                  <div
+                    className="
+                      p-4
+                      border-b
+                    "
+                  >
 
-</div>
+                    <p className="font-semibold">
 
+                      {session.user?.name}
 
+                    </p>
 
 
+                    <p
+                      className="
+                        text-xs
+                        text-gray-500
+                      "
+                    >
 
-<span className="font-semibold">
+                      {session.user?.email}
 
-{firstName}
+                    </p>
 
-</span>
 
 
+                    <p
+                      className="
+                        text-xs
+                        text-gray-400
+                        capitalize
+                      "
+                    >
 
+                      {session.user?.role}
 
-<span>
-▼
-</span>
+                    </p>
 
 
+                  </div>
 
-</button>
 
 
 
+                  <Link
 
+                    href="/profile"
 
+                    onClick={closeMenus}
 
+                    className="
+                      block
+                      px-4
+                      py-3
+                      hover:bg-gray-100
+                    "
 
+                  >
 
+                    Edit Profile
 
-{open && (
+                  </Link>
 
 
-<div className="
-absolute
-right-0
-mt-3
-w-60
-bg-white
-border
-rounded-xl
-shadow-lg
-overflow-hidden
-">
 
 
 
+                  <button
 
+                    onClick={async()=>{
 
-<div className="
-p-4
-border-b
-">
+                      closeMenus();
 
+                      await update();
 
-<p className="font-semibold">
+                      signOut({
 
-{session.user?.name}
+                        callbackUrl:"/home"
 
-</p>
+                      });
 
+                    }}
 
-<p className="
-text-xs
-text-gray-500
-">
+                    className="
+                      w-full
+                      text-left
+                      px-4
+                      py-3
+                      text-red-600
+                      hover:bg-red-50
+                    "
 
-{session.user?.email}
+                  >
 
-</p>
+                    Logout
 
+                  </button>
 
-<p className="
-text-xs
-text-gray-400
-capitalize
-">
 
-{session.user?.role}
 
-</p>
 
+                </div>
 
-</div>
+              )}
 
 
+            </div>
 
 
+          )}
 
 
+        </nav>
 
-<Link
 
-href="/profile"
 
-onClick={closeMenus}
+      </div>
 
-className="
-block
-px-4
-py-3
-hover:bg-gray-100
-"
 
->
-
-Edit Profile
-
-</Link>
-
-
-
-
-
-
-
-<button
-
-onClick={async()=>{
-
-closeMenus();
-
-await update();
-
-signOut({
-
-callbackUrl:"/home"
-
-});
-
-}}
-
-className="
-w-full
-text-left
-px-4
-py-3
-text-red-600
-hover:bg-red-50
-"
-
->
-
-Logout
-
-</button>
-
-
-
-
-
-</div>
-
-
-)}
-
-
-
-
-
-</div>
-
-
-
-)}
-
-
-
-
-</nav>
-
-
-
-
-</div>
-
-
-</header>
-
+    </header>
 
   );
 
