@@ -3,8 +3,8 @@
 import { useEffect } from "react";
 import { useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
+import AdminActivityLogs from "@/src/components/admin/AdminActivtiyLogs";
 
-import { useArticleStore } from "@/src/store/articleStore";
 import PendingQueue from "@/src/components/admin/PendingQueue";
 
 
@@ -112,6 +112,16 @@ export default function AdminDashboard() {
 
 
       <PendingQueue />
+
+      <section className="mt-12">
+
+        <h2 className="text-3xl font-bold mb-6">
+          Admin Activity Logs
+        </h2>
+
+        <AdminActivityLogs />
+        
+      </section>
 
 
     </main>
