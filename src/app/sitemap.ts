@@ -5,7 +5,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
 
 
   const baseUrl =
-    "https://YOUR-DOMAIN.vercel.app";
+    "https://the-echo-rust.vercel.app";
 
 
   return [
