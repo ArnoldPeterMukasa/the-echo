@@ -2,34 +2,41 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { useArticleStore } from "@/src/store/articleStore";
 import { uploadImage } from "@/src/lib/uploadImage";
 import ArticlePreview from "@/src/components/dashboard/ArticlePreview";
 
-export default function NewArticlePage() {
-  const router = useRouter();
 
-  const { addArticle } = useArticleStore();
+export default function NewArticlePage() {
+
+
+  const router = useRouter();
 
 
   const [title, setTitle] = useState("");
+
   const [summary, setSummary] = useState("");
+
   const [content, setContent] = useState("");
 
   const [category, setCategory] = useState("");
-  const [author, setAuthor] = useState("");
 
   const [coverImage, setCoverImage] = useState("");
+
+  const [author, setAuthor] = useState("");
 
   const [featured, setFeatured] = useState(false);
 
   const [uploading, setUploading] = useState(false);
 
+  const [saving, setSaving] = useState(false);
 
 
-  const handleSubmit = (
+
+
+
+  async function handleSubmit(
     status: "draft" | "pending"
-  ) => {
+  ) {
 
 
     if (
@@ -37,66 +44,98 @@ export default function NewArticlePage() {
       !summary.trim() ||
       !content.trim()
     ) {
-      alert("Please complete title, summary and content");
+
+      alert(
+        "Please complete title, summary and content"
+      );
+
       return;
+
     }
 
 
 
-    const newArticle = {
-
-      id: crypto.randomUUID(),
-
-      title,
-
-      summary,
-
-      content,
-
-      category:
-        category || "General",
-
-      author:
-        author || "Anonymous",
+    try {
 
 
-      coverImage,
+      setSaving(true);
 
 
-      featured,
 
-      trending: false,
+      const response =
+        await fetch(
+          "/api/articles",
+          {
 
-      views: 0,
+            method:"POST",
+
+            headers:{
+
+              "Content-Type":
+                "application/json",
+
+            },
+
+            body:JSON.stringify({
+
+              title,
+
+              excerpt: summary,
+
+              content,
+
+              category:
+                category || "General",
+
+              coverImage,
+
+              status,
+
+              featured,
+
+            }),
+
+          }
+        );
 
 
-      role: "writer" as const,
+
+      if(!response.ok){
+
+        throw new Error(
+          "Article creation failed"
+        );
+
+      }
 
 
-      slug: title
-        .toLowerCase()
-        .trim()
-        .replace(/\s+/g, "-")
-        .replace(/[^\w-]/g, ""),
+
+      router.push("/dashboard");
 
 
-      createdAt:
-        new Date()
-        .toISOString()
-        .split("T")[0],
+
+    } catch(error){
 
 
-      status,
-
-    };
+      console.error(error);
 
 
-    addArticle(newArticle);
+      alert(
+        "Could not save article"
+      );
 
 
-    router.push("/dashboard");
+    } finally {
 
-  };
+
+      setSaving(false);
+
+
+    }
+
+
+  }
+
 
 
 
@@ -108,8 +147,11 @@ export default function NewArticlePage() {
 
 
       <h1 className="text-4xl font-bold mb-8">
+
         Create Article
+
       </h1>
+
 
 
 
@@ -119,20 +161,37 @@ export default function NewArticlePage() {
 
 
         <input
+
           className="w-full border p-3 rounded"
+
           placeholder="Article title"
+
           value={title}
-          onChange={(e)=>setTitle(e.target.value)}
+
+          onChange={(e)=>
+            setTitle(e.target.value)
+          }
+
         />
+
 
 
 
         <input
+
           className="w-full border p-3 rounded"
+
           placeholder="Short summary"
+
           value={summary}
-          onChange={(e)=>setSummary(e.target.value)}
+
+          onChange={(e)=>
+            setSummary(e.target.value)
+          }
+
         />
+
+
 
 
 
@@ -144,9 +203,13 @@ export default function NewArticlePage() {
 
           value={content}
 
-          onChange={(e)=>setContent(e.target.value)}
+          onChange={(e)=>
+            setContent(e.target.value)
+          }
 
         />
+
+
 
 
 
@@ -158,29 +221,19 @@ export default function NewArticlePage() {
 
           value={category}
 
-          onChange={(e)=>setCategory(e.target.value)}
+          onChange={(e)=>
+            setCategory(e.target.value)
+          }
 
         />
 
-
-
-        <input
-
-          className="w-full border p-3 rounded"
-
-          placeholder="Author name"
-
-          value={author}
-
-          onChange={(e)=>setAuthor(e.target.value)}
-
-        />
 
 
 
 
 
         <label className="flex items-center gap-3 border rounded p-3">
+
 
           <input
 
@@ -189,7 +242,9 @@ export default function NewArticlePage() {
             checked={featured}
 
             onChange={(e)=>
-              setFeatured(e.target.checked)
+              setFeatured(
+                e.target.checked
+              )
             }
 
           />
@@ -206,13 +261,16 @@ export default function NewArticlePage() {
 
 
 
-        {/* CLOUDINARY */}
 
         <div>
 
+
           <p className="font-semibold mb-2">
+
             Cover Image
+
           </p>
+
 
 
           <input
@@ -225,6 +283,7 @@ export default function NewArticlePage() {
 
             onChange={async(e)=>{
 
+
               const file =
                 e.target.files?.[0];
 
@@ -232,36 +291,47 @@ export default function NewArticlePage() {
               if(!file) return;
 
 
+
               try {
 
+
                 setUploading(true);
+
 
 
                 const url =
                   await uploadImage(file);
 
 
+
                 setCoverImage(url);
 
 
-              } catch(error){
+
+              }catch{
+
 
                 alert(
                   "Image upload failed"
                 );
 
-              }
-              finally{
+
+              }finally{
+
 
                 setUploading(false);
 
+
               }
+
 
             }}
 
           />
 
+
         </div>
+
 
 
 
@@ -269,7 +339,9 @@ export default function NewArticlePage() {
         {uploading && (
 
           <p className="text-sm text-gray-500">
+
             Uploading image...
+
           </p>
 
         )}
@@ -285,9 +357,14 @@ export default function NewArticlePage() {
 
             src={coverImage}
 
-            alt="Cover preview"
+            alt="Cover"
 
-            className="w-full rounded-lg max-h-[300px] object-cover"
+            className="
+            w-full
+            rounded-lg
+            max-h-[300px]
+            object-cover
+            "
 
           />
 
@@ -302,19 +379,33 @@ export default function NewArticlePage() {
         <div className="flex gap-4 pt-5">
 
 
+
           <button
+
+
+            disabled={saving}
+
 
             onClick={()=>
               handleSubmit("draft")
             }
 
-            className="px-5 py-2 border rounded"
+
+            className="
+            px-5
+            py-2
+            border
+            rounded
+            disabled:opacity-50
+            "
 
           >
 
             Save Draft
 
+
           </button>
+
 
 
 
@@ -322,21 +413,39 @@ export default function NewArticlePage() {
 
           <button
 
+
+            disabled={saving}
+
+
             onClick={()=>
               handleSubmit("pending")
             }
 
-            className="px-5 py-2 bg-black text-white rounded"
+
+            className="
+            px-5
+            py-2
+            bg-black
+            text-white
+            rounded
+            disabled:opacity-50
+            "
 
           >
 
-            Submit For Review
+            {saving
+              ? "Saving..."
+              : "Submit For Review"
+            }
+
 
           </button>
 
 
 
+
         </div>
+
 
 
 
@@ -362,6 +471,7 @@ export default function NewArticlePage() {
         coverImage={coverImage}
 
       />
+
 
 
 
