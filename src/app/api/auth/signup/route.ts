@@ -27,6 +27,7 @@ export async function POST(
 
 
 
+
     if (
       !firstName ||
       !lastName ||
@@ -35,18 +36,16 @@ export async function POST(
     ) {
 
       return NextResponse.json(
-
         {
           message:"All fields are required"
         },
-
         {
           status:400
         }
-
       );
 
     }
+
 
 
 
@@ -61,16 +60,13 @@ export async function POST(
 
 
       return NextResponse.json(
-
         {
           message:
           "Password must contain uppercase, lowercase and number"
         },
-
         {
           status:400
         }
-
       );
 
 
@@ -101,15 +97,12 @@ export async function POST(
 
 
       return NextResponse.json(
-
         {
           message:"Email already exists"
         },
-
         {
           status:400
         }
-
       );
 
 
@@ -132,6 +125,7 @@ export async function POST(
 
 
 
+
     const user =
       await User.create({
 
@@ -141,9 +135,11 @@ export async function POST(
 
         email,
 
-        password:hashedPassword,
+        password:
+          hashedPassword,
 
-        role:"user",
+        role:
+          "reader",
 
       });
 
@@ -153,11 +149,12 @@ export async function POST(
 
 
 
-    return NextResponse.json(
 
+    return NextResponse.json(
       {
 
-        message:"Account created successfully",
+        message:
+          "Account created successfully",
 
         user:{
           id:user._id,
@@ -165,12 +162,11 @@ export async function POST(
         }
 
       },
-
       {
         status:201
       }
-
     );
+
 
 
 
@@ -185,19 +181,15 @@ export async function POST(
 
 
     return NextResponse.json(
-
       {
         message:"Server error"
       },
-
       {
         status:500
       }
-
     );
 
 
   }
-
 
 }
