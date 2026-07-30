@@ -3,7 +3,7 @@
 import { useEffect } from "react";
 import { useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
-import AdminActivityLogs from "@/src/components/admin/AdminActivtiyLogs";
+import AdminActivityLogs from "@/src/components/admin/AdminActivityLogs";
 
 import PendingQueue from "@/src/components/admin/PendingQueue";
 
@@ -120,7 +120,7 @@ export default function AdminDashboard() {
         </h2>
 
         <AdminActivityLogs />
-        
+
       </section>
 
 
