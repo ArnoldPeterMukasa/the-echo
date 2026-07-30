@@ -1,80 +1,114 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import Link from "next/link";
 
 
 type Article = {
-  _id: string;
-  title: string;
-  slug: string;
-  summary: string;
-  content: string;
-  category: string;
-  coverImage?: string;
-  status: string;
-  createdAt: string;
-  author: {
-    firstName: string;
-    lastName: string;
-    image?: string;
+
+  _id:string;
+
+  title:string;
+
+  slug:string;
+
+  summary:string;
+
+  content:string;
+
+  category:string;
+
+  coverImage?:string;
+
+  status:string;
+
+  createdAt:string;
+
+  author?:{
+
+    firstName:string;
+
+    lastName:string;
+
+    image?:string;
+
   };
+
 };
 
 
-export default function PendingQueue() {
+
+export default function PendingQueue(){
 
 
-  const [articles, setArticles] = useState<Article[]>([]);
+  const [articles,setArticles] =
+    useState<Article[]>([]);
 
-  const [loading, setLoading] = useState(true);
+
+  const [loading,setLoading] =
+    useState(true);
+
+
+  const [action,setAction] =
+    useState("");
+
 
 
 
   async function loadArticles(){
 
-    try {
 
-      const response = await fetch(
-        "/api/articles"
-      );
+    try{
 
 
-      const data = await response.json();
+      const response =
+        await fetch("/api/articles");
 
 
-      const pendingArticles =
+      const data =
+        await response.json();
+
+
+
+      const pending =
         data.filter(
-          (article: Article)=>
+          (article:Article)=>
             article.status === "pending"
         );
 
 
-      setArticles(pendingArticles);
+      setArticles(pending);
 
 
-    } catch(error){
 
-      console.error(
-        "Failed loading articles",
-        error
-      );
+    }catch(error){
 
-    } finally {
+
+      console.error(error);
+
+
+    }finally{
+
 
       setLoading(false);
 
+
     }
+
 
   }
 
 
 
+
+
   useEffect(()=>{
+
 
     loadArticles();
 
+
   },[]);
+
 
 
 
@@ -85,7 +119,12 @@ export default function PendingQueue() {
     status:string
   ){
 
-    try {
+
+    setAction(id);
+
+
+
+    try{
 
 
       await fetch(
@@ -95,27 +134,100 @@ export default function PendingQueue() {
           method:"PUT",
 
           headers:{
-            "Content-Type":"application/json",
+            "Content-Type":
+            "application/json"
           },
 
+
           body:JSON.stringify({
-            status,
-          }),
+            status
+          })
+
 
         }
       );
 
 
-      loadArticles();
+
+      await loadArticles();
 
 
-    } catch(error){
+
+    }catch(error){
+
 
       console.error(error);
 
+
+    }finally{
+
+
+      setAction("");
+
+
     }
 
+
   }
+
+
+
+
+
+
+  async function deleteArticle(
+    id:string
+  ){
+
+
+    const confirmDelete =
+      confirm(
+        "Delete this article permanently?"
+      );
+
+
+    if(!confirmDelete)
+      return;
+
+
+
+    setAction(id);
+
+
+
+    try{
+
+
+      await fetch(
+        `/api/articles/${id}`,
+        {
+          method:"DELETE"
+        }
+      );
+
+
+      await loadArticles();
+
+
+
+    }catch(error){
+
+
+      console.error(error);
+
+
+    }finally{
+
+
+      setAction("");
+
+
+    }
+
+
+  }
+
+
 
 
 
@@ -125,11 +237,11 @@ export default function PendingQueue() {
 
     return (
 
-      <div className="text-center py-10 text-gray-500">
+      <p className="text-center py-10 text-gray-500">
 
         Loading reviews...
 
-      </div>
+      </p>
 
     );
 
@@ -139,19 +251,23 @@ export default function PendingQueue() {
 
 
 
-  if(articles.length === 0){
+
+
+  if(!articles.length){
 
     return (
 
-      <div className="text-center text-gray-500 py-10">
+      <p className="text-center py-10 text-gray-500">
 
-        No pending articles to review
+        No pending articles.
 
-      </div>
+      </p>
 
     );
 
   }
+
+
 
 
 
@@ -162,13 +278,11 @@ export default function PendingQueue() {
     <div className="space-y-6">
 
 
-      {articles.map((article)=>(
+      {articles.map(article=>(
 
 
         <div
-
           key={article._id}
-
           className="
           border
           rounded-2xl
@@ -176,7 +290,6 @@ export default function PendingQueue() {
           bg-white
           shadow-sm
           "
-
         >
 
 
@@ -204,7 +317,13 @@ export default function PendingQueue() {
 
 
 
-          <p className="text-xs uppercase text-gray-500">
+
+
+          <p className="
+          text-xs
+          uppercase
+          text-gray-500
+          ">
 
             {article.category}
 
@@ -213,7 +332,12 @@ export default function PendingQueue() {
 
 
 
-          <h2 className="text-2xl font-bold mt-2">
+
+          <h2 className="
+          text-2xl
+          font-bold
+          mt-2
+          ">
 
             {article.title}
 
@@ -222,17 +346,34 @@ export default function PendingQueue() {
 
 
 
-          <p className="text-sm text-gray-500 mt-2">
 
-            By {article.author?.firstName}{" "}
-            {article.author?.lastName}
+
+          <p className="
+          text-sm
+          text-gray-500
+          mt-2
+          ">
+
+            By{" "}
+
+            {article.author
+            ?
+            `${article.author.firstName} ${article.author.lastName}`
+            :
+            "Unknown"
+            }
 
           </p>
 
 
 
 
-          <p className="mt-4 text-gray-700">
+
+
+          <p className="
+          mt-4
+          text-gray-700
+          ">
 
             {article.summary}
 
@@ -241,21 +382,21 @@ export default function PendingQueue() {
 
 
 
-          <p className="mt-4 text-gray-600 line-clamp-4">
-
-            {article.content}
-
-          </p>
 
 
 
-
-
-          <div className="flex flex-wrap gap-3 mt-6">
+          <div className="
+          flex
+          flex-wrap
+          gap-3
+          mt-6
+          ">
 
 
 
             <button
+
+              disabled={action===article._id}
 
               onClick={()=>
                 updateStatus(
@@ -270,13 +411,51 @@ export default function PendingQueue() {
               bg-green-600
               text-white
               rounded-lg
+              disabled:opacity-50
               "
 
             >
 
-              Publish
+              {action===article._id
+              ?
+              "Updating..."
+              :
+              "Publish"
+              }
 
             </button>
+
+
+
+
+
+
+            <button
+
+              disabled={action===article._id}
+
+              onClick={()=>
+                updateStatus(
+                  article._id,
+                  "draft"
+                )
+              }
+
+              className="
+              px-4
+              py-2
+              bg-yellow-600
+              text-white
+              rounded-lg
+              "
+
+            >
+
+              Reject
+
+            </button>
+
+
 
 
 
@@ -285,9 +464,8 @@ export default function PendingQueue() {
             <button
 
               onClick={()=>
-                updateStatus(
-                  article._id,
-                  "draft"
+                deleteArticle(
+                  article._id
                 )
               }
 
@@ -301,30 +479,9 @@ export default function PendingQueue() {
 
             >
 
-              Send Back
+              Delete
 
             </button>
-
-
-
-
-
-            <Link
-
-              href={`/articles/${article.slug}`}
-
-              className="
-              px-4
-              py-2
-              border
-              rounded-lg
-              "
-
-            >
-
-              Preview
-
-            </Link>
 
 
 
@@ -341,5 +498,6 @@ export default function PendingQueue() {
     </div>
 
   );
+
 
 }
