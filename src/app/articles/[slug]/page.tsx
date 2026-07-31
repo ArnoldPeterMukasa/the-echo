@@ -1,412 +1,127 @@
-"use client";
+import { Metadata } from "next";
+import ArticleClient from "./ArticleClient";
 
-import { useEffect, useState } from "react";
-import { useParams } from "next/navigation";
-import Link from "next/link";
-
-
-type Article = {
-  _id: string;
-  title: string;
-  slug: string;
-  excerpt: string;
-  content: string;
-  category: string;
-  coverImage?: string;
-  views?: number;
-  status?: string;
-  createdAt: string;
-
-  author?: {
-    _id: string;
-    firstName: string;
-    lastName: string;
-    image?: string;
-  };
+type Props = {
+  params: Promise<{
+    slug: string;
+  }>;
 };
 
+async function getArticle(slug: string) {
+  try {
+    const baseUrl =
+      process.env.NEXTAUTH_URL ||
+      "https://the-echo-rust.vercel.app";
 
-
-export default function ArticlePage() {
-
-  const { slug } = useParams();
-
-
-  const [article, setArticle] =
-    useState<Article | null>(null);
-
-
-  const [related, setRelated] =
-    useState<Article[]>([]);
-
-
-  const [loading, setLoading] =
-    useState(true);
-
-
-
-  useEffect(() => {
-
-
-    async function loadArticle() {
-
-      try {
-
-
-        const response =
-          await fetch("/api/articles");
-
-
-        const data =
-          await response.json();
-
-
-
-        const found =
-          data.find(
-            (item: Article) =>
-              item.slug === slug
-          );
-
-
-
-        if (!found) {
-          setArticle(null);
-          return;
-        }
-
-
-
-        let updatedArticle = found;
-
-
-
-        const viewed =
-          sessionStorage.getItem(
-            `viewed-${found._id}`
-          );
-
-
-
-        if (!viewed) {
-
-
-          const viewResponse =
-            await fetch(
-              `/api/articles/${found._id}/views`,
-              {
-                method: "PUT",
-              }
-            );
-
-
-          if(viewResponse.ok){
-
-            const viewData =
-              await viewResponse.json();
-
-
-            updatedArticle = {
-              ...found,
-              views: viewData.views,
-            };
-
-          }
-
-
-          sessionStorage.setItem(
-            `viewed-${found._id}`,
-            "true"
-          );
-
-
-        }
-
-
-
-        setArticle(updatedArticle);
-
-
-
-        const relatedArticles =
-          data.filter(
-            (item: Article) =>
-              item.category === found.category &&
-              item._id !== found._id &&
-              item.status === "published"
-          )
-          .slice(0,4);
-
-
-
-        setRelated(relatedArticles);
-
-
-
-      } catch(error){
-
-        console.error(
-          "Failed loading article",
-          error
-        );
-
-
-      } finally {
-
-        setLoading(false);
-
+    const response = await fetch(
+      `${baseUrl}/api/articles`,
+      {
+        cache: "no-store",
       }
+    );
 
+    if (!response.ok) {
+      return null;
     }
 
-
-
-    if(slug){
-
-      loadArticle();
-
-    }
-
-
-  },[slug]);
-
-
-
-
-
-  if(loading){
+    const articles = await response.json();
 
     return (
-
-      <main className="max-w-3xl mx-auto px-6 py-16">
-
-        <p className="text-gray-500 text-center">
-          Loading article...
-        </p>
-
-      </main>
-
+      articles.find(
+        (article: any) =>
+          article.slug === slug
+      ) || null
     );
+
+  } catch {
+
+    return null;
+
+  }
+}
+
+export async function generateMetadata(
+  { params }: Props
+): Promise<Metadata> {
+
+  const { slug } = await params;
+
+  const article =
+    await getArticle(slug);
+
+  if (!article) {
+
+    return {
+
+      title: "Article Not Found",
+
+      description:
+        "The requested article could not be found.",
+
+    };
 
   }
 
+  const url =
+    `https://the-echo-rust.vercel.app/articles/${article.slug}`;
 
+  return {
 
+    title: article.title,
 
+    description:
+      article.excerpt,
 
-  if(!article){
+    alternates: {
+      canonical: url,
+    },
 
-    return (
+    openGraph: {
 
-      <main className="max-w-3xl mx-auto px-6 py-16 text-center">
+      title: article.title,
 
-        <h1 className="text-2xl font-bold">
-          Article not found
-        </h1>
+      description:
+        article.excerpt,
 
-        <p className="text-gray-500 mt-2">
-          This article may have been deleted or moved.
-        </p>
+      url,
 
-      </main>
+      siteName:
+        "The Echo Magazine",
 
-    );
+      type: "article",
 
-  }
+      images: article.coverImage
+        ? [
+            {
+              url: article.coverImage,
+            },
+          ]
+        : [],
 
+    },
 
+    twitter: {
 
+      card: "summary_large_image",
 
+      title: article.title,
 
-  const words =
-    article.content?.split(" ").length || 0;
+      description:
+        article.excerpt,
 
+      images:
+        article.coverImage
+          ? [article.coverImage]
+          : [],
 
-  const readingTime =
-    Math.max(
-      1,
-      Math.ceil(words / 200)
-    );
+    },
 
+  };
 
+}
 
+export default async function Page() {
 
-  return (
-
-    <main className="max-w-3xl mx-auto px-4 sm:px-6 py-10">
-
-
-      <p className="text-sm uppercase text-gray-500">
-        {article.category}
-      </p>
-
-
-
-
-      <h1 className="text-3xl sm:text-5xl font-bold mt-3">
-        {article.title}
-      </h1>
-
-
-
-
-      <div className="text-sm text-gray-500 mt-4 flex flex-wrap gap-2">
-
-
-        <span>
-
-          By{" "}
-
-          {article.author ? (
-
-            <Link
-              href={`/author/${article.author._id}`}
-              className="underline hover:text-black"
-            >
-
-              {article.author.firstName}{" "}
-              {article.author.lastName}
-
-            </Link>
-
-          ) : (
-            "Unknown"
-          )}
-
-        </span>
-
-
-
-        <span>•</span>
-
-
-        <span>
-          {new Date(article.createdAt)
-            .toLocaleDateString()}
-        </span>
-
-
-        <span>•</span>
-
-
-        <span>
-          {article.views || 0} views
-        </span>
-
-
-        <span>•</span>
-
-
-        <span>
-          {readingTime} min read
-        </span>
-
-
-      </div>
-
-
-
-
-
-      {article.coverImage && (
-
-        <img
-          src={article.coverImage}
-          alt={article.title}
-          loading="lazy"
-          className="
-          w-full
-          mt-8
-          rounded-xl
-          max-h-[450px]
-          object-cover
-          "
-        />
-
-      )}
-
-
-
-
-
-
-      <p className="mt-8 text-lg text-gray-700 leading-relaxed">
-
-        {article.excerpt}
-
-      </p>
-
-
-
-
-
-      <div className="mt-8 text-lg leading-8 whitespace-pre-line">
-
-        {article.content}
-
-      </div>
-
-
-
-
-
-
-      {related.length > 0 && (
-
-        <section className="mt-12 border-t pt-8">
-
-
-          <h2 className="text-xl font-bold mb-5">
-            Related Articles
-          </h2>
-
-
-
-          <div className="grid gap-4">
-
-
-            {related.map((item)=>(
-
-              <Link
-
-                key={item._id}
-
-                href={`/articles/${item.slug}`}
-
-                className="
-                border
-                rounded-lg
-                p-4
-                hover:shadow
-                "
-
-              >
-
-                <h3 className="font-semibold">
-                  {item.title}
-                </h3>
-
-
-                <p className="text-sm text-gray-500">
-                  {item.excerpt}
-                </p>
-
-
-              </Link>
-
-            ))}
-
-
-          </div>
-
-
-        </section>
-
-      )}
-
-
-    </main>
-
-  );
+  return <ArticleClient />;
 
 }
